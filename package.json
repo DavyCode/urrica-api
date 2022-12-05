@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "build": "npx tsc",
+    "build": "tsc",
     "start:tsc": "node dist/app.js",
     "start": "tsc && node ./dist/app.js",
     "debug": "export DEBUG=* && npm start",
