@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "tsc",
-    "prebuild": "npm install typescript -g",
+    "prebuild": "npm install typescript",
     "start:tsc": "node dist/app.js",
     "start": "tsc && node ./dist/app.js",
     "debug": "export DEBUG=* && npm start",
