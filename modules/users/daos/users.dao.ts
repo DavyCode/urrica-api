@@ -1,4 +1,4 @@
-import mongooseService from '../../../common/services/mongoose.services'
+import mongooseService from '../../../common/services/mongoose.services';
 import shortid from 'shortid';
 import debug from 'debug';
 import { CreateUserDto } from '../dto/create.user.dto';
@@ -26,12 +26,12 @@ class UsersDao {
   }
 
   /***********************
-   * 
+   *
    ****************************/
 
   /**
    * addUser
-   * @param userFields 
+   * @param userFields
    * @returns <CreateUserDto>
    * @public
    */
@@ -41,7 +41,7 @@ class UsersDao {
       _id: userId,
       ...userFields,
     });
-    
+
     const newUser = await user.save();
     return newUser;
   }
@@ -60,16 +60,16 @@ class UsersDao {
 
   /**
    * putUserById
-   * @param userId 
-   * @param userFields 
+   * @param userId
+   * @param userFields
    * @returns UserDto
    * @public
    */
   async putUserById(userId: string, userFields: PutUserDto | PatchUserDto) {
     const existingUser = await this.User.findOneAndUpdate(
-      { _id: userId }, 
+      { _id: userId },
       { $set: userFields },
-      { new: true }
+      { new: true },
     ).exec();
 
     return existingUser;
@@ -77,9 +77,9 @@ class UsersDao {
 
   /**
    * getUserById
-   * @param userId 
+   * @param userId
    * @returns UserDto
-   * @public 
+   * @public
    */
   async getUserById(userId: string) {
     return this.User.findOne({ _id: userId }).populate('User').exec();
@@ -87,7 +87,7 @@ class UsersDao {
 
   /**
    * getUserByEmail
-   * @param email 
+   * @param email
    * @returns UserDto
    * @public
    */
@@ -97,7 +97,7 @@ class UsersDao {
 
   /**
    * getUserByEmailAddPassword
-   * @param email 
+   * @param email
    * @returns UserDto
    * @public
    */

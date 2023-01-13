@@ -2,20 +2,19 @@ import express from 'express';
 import usersService from '../../users/services/user.services';
 import * as argon2 from 'argon2';
 
-
 class AuthMiddleware {
   async verifyUserPassword(
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction
+    next: express.NextFunction,
   ) {
     const user: any = await usersService.getUserByEmailAddPassword(
-      req.body.email
+      req.body.email,
     );
 
     if (user) {
       const passwordHash = user.password;
-      
+
       if (await argon2.verify(passwordHash, req.body.password)) {
         return next();
       } else {
@@ -25,7 +24,12 @@ class AuthMiddleware {
         });
       }
     } else {
-      res.status(400).send({ status: 'error', errors: 'Invalid email and/or password, user not found' });
+      res
+        .status(400)
+        .send({
+          status: 'error',
+          errors: 'Invalid email and/or password, user not found',
+        });
     }
   }
 }

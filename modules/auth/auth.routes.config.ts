@@ -1,9 +1,8 @@
 import express from 'express';
 import { CommonRoutesConfig } from '../../common/common.routes.config';
-import ValidationMiddleware from '../../common/middleware/ValidationMiddleware'
+import ValidationMiddleware from '../../common/middleware/ValidationMiddleware';
 import authMiddleware from './middleware/auth.middleware';
 import authController from './controllers/auth.controller';
-
 
 export class AuthRoutes extends CommonRoutesConfig {
   constructor(app: express.Application) {
@@ -20,4 +19,3 @@ export class AuthRoutes extends CommonRoutesConfig {
     return this.app;
   }
 }
-

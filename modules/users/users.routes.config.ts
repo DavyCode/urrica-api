@@ -15,27 +15,26 @@ export class UsersRoutes extends CommonRoutesConfig {
    * Execute default abstract class from parent
    */
   configureRoutes() {
-    this.app.route(`/users`)
+    this.app
+      .route(`/users`)
       .post(
         ValidationMiddleware.CreateUserValidator,
         UsersMiddleware.validateSameEmailDoesntExist,
-        UsersController.createUser
+        UsersController.createUser,
       );
 
     // this.app.param(`userId`, UsersMiddleware.extractUserId);
-    this.app.route(`/users/:userId`)
-      .all(
-        UsersMiddleware.validateUserExists,
-        JwtMiddleware.validJWTNeeded,
-      )
-      .get(UsersController.getUserById)
-      
+    this.app
+      .route(`/users/:userId`)
+      .all(UsersMiddleware.validateUserExists, JwtMiddleware.validJWTNeeded)
+      .get(UsersController.getUserById);
+
     this.app.put(`/users/:userId`, [
       JwtMiddleware.validJWTNeeded,
       ValidationMiddleware.UpdateUserValidator,
       AuthMiddleware.verifyUserPassword,
       UsersController.put,
-    ])
+    ]);
 
     return this.app;
   }
