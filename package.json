@@ -7,7 +7,7 @@
     "prebuild": "npm install typescript",
     "start": "tsc && node ./dist/app.js",
     "debug": "export DEBUG=* && npm start",
-    "dev": "concurrently \"npx tsc --watch\" \"nodemon -- dist/app.js\"",
+    "dev": "NODE_ENV=development concurrently \"npx tsc --watch\" \"nodemon -- dist/app.js\"",
     "dev:debug": "export DEBUG=* && concurrently \"npx tsc --watch\" \"nodemon -- dist/app.js\"",
     "release": "standard-version",
     "lint": "eslint . --ext .ts",
