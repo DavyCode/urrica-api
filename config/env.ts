@@ -4,7 +4,10 @@ console.log('No value for FOO yet:', process.env.FOO);
 console.log('ENV IS:', process.env);
 console.log('NODE EnV is:', process.env.NODE_ENV);
 
-if (process.env.NODE_ENV !== 'production') {
+if (
+  process.env.RAILWAY_ENVIRONMENT !== 'production' ||
+  process.env.NODE_ENV !== 'production'
+) {
   const dotenvResult = dotenv.config();
   console.log('========================xxxx', dotenvResult);
 
