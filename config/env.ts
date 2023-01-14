@@ -1,6 +1,8 @@
 import dotenv from 'dotenv';
 
 const dotenvResult = dotenv.config();
+console.log('========================xxxx', dotenvResult);
+
 if (dotenvResult.error) {
   throw dotenvResult.error;
 }
