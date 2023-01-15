@@ -5,10 +5,10 @@
   "scripts": {
     "build": "tsc",
     "prebuild": "npm install typescript",
-    "start": "tsc && node ./dist/app.js",
+    "start": "tsc && node ./dist/server.js",
     "debug": "export DEBUG=* && npm start",
-    "dev": "NODE_ENV=development concurrently \"npx tsc --watch\" \"nodemon -- dist/app.js\"",
-    "dev:debug": "export DEBUG=* && concurrently \"npx tsc --watch\" \"nodemon -- dist/app.js\"",
+    "dev": "NODE_ENV=development concurrently \"npx tsc --watch\" \"nodemon -- dist/server.js\"",
+    "dev:debug": "export DEBUG=* && concurrently \"npx tsc --watch\" \"nodemon -- dist/server.js\"",
     "release": "standard-version",
     "lint": "eslint . --ext .ts",
     "snyk": "snyk test",

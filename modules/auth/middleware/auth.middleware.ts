@@ -8,7 +8,7 @@ class AuthMiddleware {
     res: express.Response,
     next: express.NextFunction,
   ) {
-    const user: any = await usersService.getUserByEmailAddPassword(
+    const user: any = await usersService.getUserByEmailAndPassword(
       req.body.email,
     );
 
@@ -24,12 +24,10 @@ class AuthMiddleware {
         });
       }
     } else {
-      res
-        .status(400)
-        .send({
-          status: 'error',
-          errors: 'Invalid email and/or password, user not found',
-        });
+      res.status(400).send({
+        status: 'error',
+        errors: 'Invalid email and/or password, user not found',
+      });
     }
   }
 }

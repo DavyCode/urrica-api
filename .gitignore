@@ -3,3 +3,5 @@ dist
 .env
 todo
 notes.todo
+REF.todo
+app.old.ts

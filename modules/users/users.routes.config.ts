@@ -2,7 +2,7 @@ import express from 'express';
 import { CommonRoutesConfig } from '../../common/common.routes.config';
 import UsersController from './controllers/users.controller';
 import UsersMiddleware from './middleware/users.middleware';
-import ValidationMiddleware from '../../common/middleware/ValidationMiddleware';
+import UserValidationMiddleware from './middleware/users.middleware.validation';
 import JwtMiddleware from '../auth/middleware/jwt.middleware';
 import AuthMiddleware from '../auth/middleware/auth.middleware';
 
@@ -18,7 +18,7 @@ export class UsersRoutes extends CommonRoutesConfig {
     this.app
       .route(`/users`)
       .post(
-        ValidationMiddleware.CreateUserValidator,
+        UserValidationMiddleware.CreateUserValidator,
         UsersMiddleware.validateSameEmailDoesntExist,
         UsersController.createUser,
       );
@@ -31,7 +31,7 @@ export class UsersRoutes extends CommonRoutesConfig {
 
     this.app.put(`/users/:userId`, [
       JwtMiddleware.validJWTNeeded,
-      ValidationMiddleware.UpdateUserValidator,
+      UserValidationMiddleware.UpdateUserValidator,
       AuthMiddleware.verifyUserPassword,
       UsersController.put,
     ]);

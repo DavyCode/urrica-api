@@ -96,12 +96,12 @@ class UsersDao {
   }
 
   /**
-   * getUserByEmailAddPassword
+   * getUserByEmailAndPassword
    * @param email
    * @returns UserDto
    * @public
    */
-  async getUserByEmailAddPassword(email: string) {
+  async getUserByEmailAndPassword(email: string) {
     return this.User.findOne({ email: email })
       .select('_id email +password')
       .exec();

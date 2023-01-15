@@ -9,21 +9,18 @@ import helmet from 'helmet';
 import hpp from 'hpp';
 import xss from 'xss-clean';
 import mongoSanitize from 'express-mongo-sanitize';
-import { CommonRoutesConfig } from './common/common.routes.config';
-import { UsersRoutes } from './modules/users/users.routes.config';
-import { AuthRoutes } from './modules/auth/auth.routes.config';
-import headerOptions from './setup/headerOptions';
-import checkHeaderForAuth from './common/middleware/checkHeaderForAuth';
-import { PORT } from './config/env';
+import { CommonRoutesConfig } from '../common/common.routes.config';
+import { UsersRoutes } from '../modules/users/users.routes.config';
+import { AuthRoutes } from '../modules/auth/auth.routes.config';
+import headerOptions from '../setup/headerOptions';
+import checkHeaderForAuth from '../common/middleware/checkHeaderForAuth';
 
 const app: express.Application = express();
-const server: http.Server = http.createServer(app);
 const routes: Array<CommonRoutesConfig> = [];
 const debugLog: debug.IDebugger = debug('app');
 
 app.use(express.json());
-app.use(cors());
-app.use(helmet());
+app.use(express.urlencoded({ extended: true }));
 
 /**
  * HPP puts array parameters in req.query and/or req.body aside and just selects the last parameter value. You add the middleware and you are done.
@@ -100,14 +97,7 @@ routes.push(new UsersRoutes(app));
 routes.push(new AuthRoutes(app));
 
 app.get('/', (req: express.Request, res: express.Response) => {
-  res
-    .status(200)
-    .send({ message: `Server running at http://localhost:${PORT}` });
+  res.status(200).send({ message: `Server is up!!!` });
 });
 
-export default server.listen(PORT, () => {
-  debugLog(`Server running at http://localhost:${PORT}`);
-  routes.forEach((route: CommonRoutesConfig) => {
-    debugLog(`Routes configured for ${route.getName()}`);
-  });
-});
+export { app as default, routes };
