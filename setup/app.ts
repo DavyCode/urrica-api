@@ -13,7 +13,9 @@ import { CommonRoutesConfig } from '../common/common.routes.config';
 import { UsersRoutes } from '../modules/users/users.routes.config';
 import { AuthRoutes } from '../modules/auth/auth.routes.config';
 import headerOptions from '../setup/headerOptions';
-import checkHeaderForAuth from '../common/middleware/checkHeaderForAuth';
+import checkHeaders from '../common/middleware/checkHeaders';
+import { errorHandler } from '../common/utils/errors';
+import { API_BASE_URI } from '../config/env';
 
 const app: express.Application = express();
 const routes: Array<CommonRoutesConfig> = [];
@@ -78,9 +80,6 @@ if (process.env.DEBUG) {
   });
 } else {
   loggerOptions.meta = false; // when not debugging, make terse
-  // if (typeof global.it === "function") {
-  // 	loggerOptions.level = "http"; // for non-debug test runs, squelch entirely
-  // }
 }
 
 /**
@@ -88,16 +87,24 @@ if (process.env.DEBUG) {
  */
 app.use(headerOptions);
 
-app.all('/*', checkHeaderForAuth);
+app.all('/*', checkHeaders.checkHeadersForAuthorization);
 
-// app.all('/*', checkHeader)
 app.use(expressWinston.logger(loggerOptions));
 
 routes.push(new UsersRoutes(app));
 routes.push(new AuthRoutes(app));
 
-app.get('/', (req: express.Request, res: express.Response) => {
-  res.status(200).send({ message: `Server is up!!!` });
-});
+app.get(
+  `${API_BASE_URI}/health`,
+  (req: express.Request, res: express.Response) => {
+    console.log('Request', req.body, 'Response', JSON.stringify(res.locals));
+    res.status(200).send('Server is up!!!');
+  },
+);
+
+/**
+ *  error handler
+ */
+app.use(errorHandler);
 
 export { app as default, routes };

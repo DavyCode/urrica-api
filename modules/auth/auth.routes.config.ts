@@ -1,8 +1,8 @@
 import express from 'express';
 import { CommonRoutesConfig } from '../../common/common.routes.config';
 import AuthValidationMiddleware from './middleware/auth.middleware.validation';
-import authMiddleware from './middleware/auth.middleware';
 import authController from './controllers/auth.controller';
+import { API_BASE_URI } from '../../config/env';
 
 export class AuthRoutes extends CommonRoutesConfig {
   constructor(app: express.Application) {
@@ -10,10 +10,9 @@ export class AuthRoutes extends CommonRoutesConfig {
   }
 
   configureRoutes(): express.Application {
-    this.app.post(`/auth`, [
+    this.app.post(`${API_BASE_URI}/auth`, [
       AuthValidationMiddleware.AuthUserValidator,
-      authMiddleware.verifyUserPassword,
-      authController.createJWT,
+      authController.authUser,
     ]);
 
     return this.app;

@@ -1,3 +1,3 @@
-export type Jwt = {
+export type JWT_ = {
   userId: string;
 };

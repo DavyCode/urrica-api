@@ -29,6 +29,10 @@ class MongooseService {
     return mongoose;
   }
 
+  validMongooseObjectId(id: string) {
+    return mongoose.Types.ObjectId.isValid(id);
+  }
+
   connectWithRetry = () => {
     log('Attempting MongoDB connection (will retry if needed)');
 

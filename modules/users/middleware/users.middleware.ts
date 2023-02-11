@@ -1,11 +1,18 @@
 import express from 'express';
-import userService from '../services/user.services';
 import debug from 'debug';
-import jwt from 'jsonwebtoken';
-import { JWT_SECRET, JWT_EXPIRATION_MINUTES } from '../../../config/env';
-import * as argon2 from 'argon2';
+import usersService from '../services/user.services';
+import userController from '../controllers/users.controller';
+import {
+  BadRequestError,
+  ForbiddenError,
+  NotFoundError,
+} from '../../../common/utils/errors';
+import {
+  emailErrors,
+  userErrors,
+} from '../../../common/constant/errorMessages';
 
-const log: debug.IDebugger = debug('app:users-controller');
+const log: debug.IDebugger = debug('app:users-controller-middleware');
 
 class UsersMiddleware {
   async validateUserExists(
@@ -13,27 +20,35 @@ class UsersMiddleware {
     res: express.Response,
     next: express.NextFunction,
   ) {
-    const user = await userService.getById(req.params.userId);
+    const user = await usersService.getById(req.params.userId);
     if (user) {
       next();
     } else {
-      res.status(404).send({
-        status: 'error',
-        error: `User ${req.params.userId} not found`,
-      });
+      throw new NotFoundError(userErrors.userIdNotFound);
     }
   }
 
-  async validateSameEmailDoesntExist(
+  async validateSameEmailExist(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) {
-    const user = await userService.getUserByEmail(req.body.email);
+    const user = await usersService.getUserByEmail(req.body.email);
     if (user) {
-      res
-        .status(400)
-        .send({ status: 'error', error: `User email already exists` });
+      throw new NotFoundError(emailErrors.emailTaken);
+    } else {
+      next();
+    }
+  }
+
+  async validateSameEmailAndVerified(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) {
+    const user = await usersService.getUserByEmail(req.body.email);
+    if (user && user.verified) {
+      throw new ForbiddenError(emailErrors.emailTakenAndVerified);
     } else {
       next();
     }
