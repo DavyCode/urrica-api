@@ -20,6 +20,13 @@ class Utils {
   parseToJSON(item: any): any {
     return JSON.parse(JSON.stringify(item));
   }
+
+  escapeRegex(text: string) {
+    if (!text || typeof text !== 'string') {
+      return false;
+    }
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+  }
 }
 
 export default new Utils();

@@ -1,6 +1,10 @@
 import mongoose from 'mongoose';
 import debug from 'debug';
 import { DBURL } from '../../config/env';
+import {
+  MongooseObjectId,
+  MongooseUpdateOptions,
+} from '../types/mongoose.types';
 
 const log: debug.IDebugger = debug('app:mongoose-service');
 
@@ -29,7 +33,7 @@ class MongooseService {
     return mongoose;
   }
 
-  validMongooseObjectId(id: string) {
+  validMongooseObjectId(id: string | MongooseObjectId) {
     return mongoose.Types.ObjectId.isValid(id);
   }
 
