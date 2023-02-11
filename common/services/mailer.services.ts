@@ -70,11 +70,11 @@ class MailerService {
             const sendEmail = ses.sendEmail(params).promise();
             sendEmail
               .then((data) => {
-                console.log('email submitted to SES');
+                log('email submitted to SES');
                 return resolve(data);
               })
               .catch((error) => {
-                console.log('message did not deliver', error);
+                log('message did not deliver', error);
                 return reject(error);
               });
           } catch (error) {

@@ -94,16 +94,12 @@ app.use(expressWinston.logger(loggerOptions));
 routes.push(new UsersRoutes(app));
 routes.push(new AuthRoutes(app));
 
-app.get(
-  `${API_BASE_URI}/health`,
-  (req: express.Request, res: express.Response) => {
-    console.log('Request', req.body, 'Response', JSON.stringify(res.locals));
-    res.status(200).send('Server is up!!!');
-  },
-);
+app.get(`/`, (req: express.Request, res: express.Response) => {
+  res.status(200).send('Full authentication is required');
+});
 
 /**
- *  error handler
+ * error handler
  */
 app.use(errorHandler);
 

@@ -54,7 +54,6 @@ export const errorHandler = (
   /**
    * log the error message, and meta object
    */
-  console.log('888----', Object.keys(error), '---88888');
   let respondWith = {
     errors: [error.message ? error.message : 'Something went wrong'],
     statusCode: error.statusCode
@@ -62,7 +61,6 @@ export const errorHandler = (
       : ServerResponseStatus.INTERNAL_SERVER_ERROR,
     status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
   };
-  console.log('888----', respondWith, '---88888');
 
   if (NODE_ENV === 'development' && !(error instanceof APIError)) {
     respondWith = Object.assign({}, respondWith, { stack: error.stack });
