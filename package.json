@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "start": "tsc && node ./dist/server.js",
+    "start": "npm run build && node ./dist/server.js",
     "build": "tsc",
     "debug": "export DEBUG=* && npm start",
     "dev": "NODE_ENV=development export DEBUG=* && tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/server.js\"",
@@ -12,7 +12,7 @@
     "snyk": "snyk test",
     "lint:format": "eslint . --ext .ts --fix",
     "prettier-format": "prettier --config .prettierrc . --ext .ts --write",
-    "prebuild": "npm install typescript"
+    "prebuild": "npm install typescript -g"
   },
   "repository": {
     "type": "git",
