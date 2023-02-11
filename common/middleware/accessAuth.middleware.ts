@@ -19,7 +19,7 @@ class AccessAuthMiddleware {
       throw new UnauthorizedError('Unauthorized');
     }
 
-    next();
+    return next();
   }
 
   async ensureAdmin(
@@ -30,12 +30,12 @@ class AccessAuthMiddleware {
     if (!response.locals.jwt) {
       throw new UnauthorizedError('Unauthorized');
     }
-    if (response.locals.jwt.role !== rolesEnum.SUPERADMIN) {
+    if (response.locals.jwt.role !== rolesEnum.SUPER_ADMIN) {
       if (response.locals.jwt.role !== rolesEnum.ADMIN) {
         throw new UnauthorizedError('Access denied!');
       }
     }
-    next();
+    return next();
   }
 
   async ensureSuperAdmin(
@@ -46,12 +46,18 @@ class AccessAuthMiddleware {
     if (!response.locals.jwt) {
       throw new UnauthorizedError('Unauthorized');
     }
-    if (response.locals.jwt.role !== rolesEnum.SUPERADMIN) {
+    if (response.locals.jwt.role !== rolesEnum.SUPER_ADMIN) {
       throw new UnauthorizedError('Access denied!');
     }
-    next();
+    return next();
   }
 
+  /**
+   * grantRoleAccess
+   * @param action
+   * @param resource
+   * @returns NextFunction
+   */
   grantRoleAccess(action: string, resource: string) {
     return async (request: Request, response: Response, next: NextFunction) => {
       const permission = accessRolesControl
@@ -62,7 +68,7 @@ class AccessAuthMiddleware {
           "You don't have enough permission to perform this action",
         );
       }
-      next();
+      return next();
     };
   }
 
@@ -74,14 +80,38 @@ class AccessAuthMiddleware {
     if (!response.locals.jwt) {
       throw new UnauthorizedError('Unauthorized');
     }
-    if (response.locals.jwt.role !== rolesEnum.SUPERADMIN) {
+    if (response.locals.jwt.role !== rolesEnum.SUPER_ADMIN) {
       if (response.locals.jwt.role !== rolesEnum.ADMIN) {
         if (response.locals.jwt.role !== rolesEnum.SUPPORT) {
           throw new UnauthorizedError('Access denied');
         }
       }
     }
-    next();
+    return next();
+  }
+
+  async allowSameUserOrAdmin(
+    request: Request,
+    response: Response,
+    next: NextFunction,
+  ) {
+    if (
+      request.params &&
+      request.params.userId &&
+      request.params.userId === response.locals.jwt.userId
+    ) {
+      return next();
+    } else {
+      const role = response.locals.jwt.role;
+      if (role !== rolesEnum.SUPER_ADMIN) {
+        if (role !== rolesEnum.ADMIN) {
+          if (role !== rolesEnum.SUPPORT) {
+            throw new UnauthorizedError('Access denied');
+          }
+        }
+      }
+      return next();
+    }
   }
 }
 

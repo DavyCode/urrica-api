@@ -17,7 +17,7 @@ export default (() => {
 
   ac.grant(rolesEnum.ADMIN).extend(rolesEnum.SUPPORT);
 
-  ac.grant(rolesEnum.SUPERADMIN)
+  ac.grant(rolesEnum.SUPER_ADMIN)
     .extend(rolesEnum.USER)
     .extend(rolesEnum.SUPPORT)
     .extend(rolesEnum.ADMIN)

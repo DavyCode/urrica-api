@@ -51,4 +51,32 @@ Pubsub.on('user_signup_otp_confirmed', async ({ email, firstName }) => {
   }
 });
 
+Pubsub.on('reset_password_otp', async ({ email, otp, firstName }) => {
+  try {
+    if (email) {
+      await MailerServices.sendMailAws({
+        email,
+        otp,
+        firstName,
+        templateName: 'reset-password-otp',
+      });
+    }
+  } catch (err) {
+    log('error', err);
+  }
+});
+Pubsub.on('password_reset_success', async ({ email, otp, firstName }) => {
+  try {
+    if (email) {
+      await MailerServices.sendMailAws({
+        email,
+        firstName,
+        templateName: 'password-reset-success',
+      });
+    }
+  } catch (err) {
+    log('error', err);
+  }
+});
+
 export default Pubsub;
