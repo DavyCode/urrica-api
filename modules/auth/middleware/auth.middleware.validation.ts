@@ -1,5 +1,7 @@
 import express from 'express';
 import Joi from 'joi';
+import ServerResponseStatus from '../../../common/constant/ServerResponseStatus';
+import { BadRequestError } from '../../../common/utils/errors';
 
 class AuthValidationMiddleware {
   async AuthUserValidator(
@@ -18,9 +20,10 @@ class AuthValidationMiddleware {
       await schema.validateAsync(req.body);
       return next();
     } catch (err: any) {
-      return res
-        .status(400)
-        .json({ status: 'error', message: `${err.details[0].message}` });
+      return res.status(400).json({
+        status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
+        errors: [`${err.details[0].message}`],
+      });
     }
   }
 }

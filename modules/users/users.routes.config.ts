@@ -1,10 +1,12 @@
 import express from 'express';
 import { CommonRoutesConfig } from '../../common/common.routes.config';
-import UsersController from './controllers/users.controller';
+import usersController from './controllers/users.controller';
 import UsersMiddleware from './middleware/users.middleware';
-import UserValidationMiddleware from './middleware/users.middleware.validation';
-import JwtMiddleware from '../auth/middleware/jwt.middleware';
-import AuthMiddleware from '../auth/middleware/auth.middleware';
+import UsersValidationMiddleware from './middleware/users.validation.middleware';
+// import JwtMiddleware from '../auth/middleware/jwt.middleware';
+// import AuthMiddleware from '../auth/middleware/auth.middleware';
+import { API_BASE_URI } from '../../config/env';
+import accessAuthMiddleware from '../../common/middleware/accessAuth.middleware';
 
 export class UsersRoutes extends CommonRoutesConfig {
   constructor(app: express.Application) {
@@ -14,27 +16,39 @@ export class UsersRoutes extends CommonRoutesConfig {
   /**
    * Execute default abstract class from parent
    */
-  configureRoutes() {
+  configureRoutes(): express.Application {
     this.app
-      .route(`/users`)
+      .route(`${API_BASE_URI}/users`)
+      .get
+      // jwtMiddleware.validJWTNeeded,
+      // permissionMiddleware.onlyAdminCanDoThisAction,
+      // usersController.listUsers
+      ()
       .post(
-        UserValidationMiddleware.CreateUserValidator,
-        UsersMiddleware.validateSameEmailDoesntExist,
-        UsersController.createUser,
+        UsersValidationMiddleware.CreateUserValidator,
+        usersController.createUser,
       );
 
     // this.app.param(`userId`, UsersMiddleware.extractUserId);
     this.app
-      .route(`/users/:userId`)
-      .all(UsersMiddleware.validateUserExists, JwtMiddleware.validJWTNeeded)
-      .get(UsersController.getUserById);
+      .route(`${API_BASE_URI}/users/:userId`)
+      .all(accessAuthMiddleware.ensureAuth)
+      .get(
+        accessAuthMiddleware.grantRoleAccess('readOwn', 'User'),
+        usersController.getUserById,
+      );
 
-    this.app.put(`/users/:userId`, [
-      JwtMiddleware.validJWTNeeded,
-      UserValidationMiddleware.UpdateUserValidator,
-      AuthMiddleware.verifyUserPassword,
-      UsersController.put,
+    this.app.put(`${API_BASE_URI}/users/:userId`, [
+      // JwtMiddleware.validJWTNeeded,
+      UsersValidationMiddleware.UpdateUserValidator,
+      // AuthMiddleware.verifyUserPassword,
+      usersController.put,
     ]);
+
+    this.app
+      .route(`${API_BASE_URI}/users/verify/otp`)
+      .all(UsersValidationMiddleware.verifyEmailOtpValidator)
+      .get(usersController.verifyUserOtp);
 
     return this.app;
   }
