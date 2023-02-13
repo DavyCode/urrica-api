@@ -17,6 +17,7 @@ class UsersValidationMiddleware {
         firstName: Joi.string().min(2).required(),
         lastName: Joi.string().min(2).required(),
         howDidYouHearAboutUs: Joi.string().min(2).required(),
+        referredBy: Joi.string(),
       })
       .with('email', 'password');
 
@@ -27,7 +28,6 @@ class UsersValidationMiddleware {
         req.body.password == 11111111 ||
         req.body.password == '11111111'
       ) {
-        // throw new Error('failed'); //BadRequestError('Kindly choose a stronger password');
         return res.status(ServerResponseStatus.BAD_REQUEST).json({
           status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
           errors: ['Kindly choose a stronger password'],
@@ -49,7 +49,7 @@ class UsersValidationMiddleware {
     next: express.NextFunction,
   ) {
     const schema = Joi.object().keys({
-      otp: Joi.string().min(4).max(10).required(),
+      otp: Joi.string().min(4).max(10).pattern(new RegExp('^[0-9]')).required(),
     });
 
     try {
@@ -63,7 +63,7 @@ class UsersValidationMiddleware {
     }
   }
 
-  async emailValidator(
+  async emailParamsValidator(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
@@ -82,6 +82,25 @@ class UsersValidationMiddleware {
       });
     }
   }
+  async emailValidator(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) {
+    const schema = Joi.object().keys({
+      email: Joi.string().email().required(),
+    });
+
+    try {
+      await schema.validateAsync(req.body);
+      return next();
+    } catch (err: any) {
+      return res.status(400).json({
+        status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
+        errors: [`${err.details[0].message}`],
+      });
+    }
+  }
 
   async passwordResetConfirmValidator(
     req: express.Request,
@@ -89,7 +108,7 @@ class UsersValidationMiddleware {
     next: express.NextFunction,
   ) {
     const schema = Joi.object().keys({
-      otp: Joi.string().min(4).max(10).required(),
+      otp: Joi.string().min(4).max(10).pattern(new RegExp('^[0-9]')).required(),
       password: Joi.string().min(8).required(),
     });
 

@@ -15,7 +15,6 @@ import { AuthRoutes } from '../modules/auth/auth.routes.config';
 import headerOptions from '../setup/headerOptions';
 import checkHeaders from '../common/middleware/checkHeaders';
 import { errorHandler } from '../common/utils/errors';
-import { API_BASE_URI } from '../config/env';
 
 const app: express.Application = express();
 const routes: Array<CommonRoutesConfig> = [];

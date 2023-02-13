@@ -50,10 +50,15 @@ export class UsersRoutes extends CommonRoutesConfig {
       usersController.patchUser,
     ]);
 
-    this.app
-      .route(`${API_BASE_URI}/users/verify/:otp`)
-      .all(UsersValidationMiddleware.otpValidator)
-      .get(usersController.verifyUserOtp);
+    this.app.get(`${API_BASE_URI}/users/verify/otp/:email`, [
+      UsersValidationMiddleware.emailParamsValidator,
+      usersController.getVerifyUserOtp,
+    ]);
+
+    this.app.get(`${API_BASE_URI}/users/verify/:otp`, [
+      UsersValidationMiddleware.otpValidator,
+      usersController.verifyUserOtp,
+    ]);
 
     this.app.put(`${API_BASE_URI}/users/password/:userId`, [
       accessAuthMiddleware.ensureAuth,
@@ -65,11 +70,11 @@ export class UsersRoutes extends CommonRoutesConfig {
 
     this.app
       .route(`${API_BASE_URI}/users/password/reset/:email`)
-      .all(UsersValidationMiddleware.emailValidator)
+      .all(UsersValidationMiddleware.emailParamsValidator)
       .get(usersController.getPasswordResetOtp);
 
     this.app
-      .route(`${API_BASE_URI}/users/password/reset/confirm/:otp/:password`)
+      .route(`${API_BASE_URI}/users/password/reset/:otp/:password`)
       .all(UsersValidationMiddleware.passwordResetConfirmValidator)
       .get(usersController.resetPassword);
 

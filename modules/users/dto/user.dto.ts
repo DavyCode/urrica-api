@@ -16,4 +16,6 @@ export interface UserDto {
   googleToken?: string;
   googleSubUserId?: string;
   howDidYouHearAboutUs?: string;
+  referredBy?: MongooseObjectId | null;
+  referralRecord?: MongooseObjectId;
 }
