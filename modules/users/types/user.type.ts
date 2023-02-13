@@ -7,6 +7,7 @@ export type User = {
   email?: string;
   firstName?: string;
   lastName?: string;
+  profileImage?: string;
   resetPasswordPin?: string;
   passwordHash?: string;
   verifyEmailOtp?: string;

@@ -89,6 +89,13 @@ class UsersController {
     res.status(controllerRes.statusCode).send(controllerRes);
   }
 
+  async getVerifyUserOtp(req: Request, res: Response): Promise<void> {
+    const { message, ...rest } = await usersService.getVerifyUserOtp(
+      req.params.email,
+    );
+    const controllerRes = new apiOKResponse(rest, message);
+    res.status(controllerRes.statusCode).send(controllerRes);
+  }
   /**
    * getPasswordResetOtp
    * @param req

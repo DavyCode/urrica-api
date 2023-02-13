@@ -2,6 +2,7 @@ import UsersDao from '../daos/users.dao';
 import { CRUD } from '../../../common/interfaces/crud.interface';
 import { CreateUserDto } from '../dto/create.user.dto';
 import { PutUserDto } from '../dto/put.user.dto';
+import { User } from '../types/user.type';
 import {
   BadRequestError,
   ForbiddenError,
@@ -13,6 +14,7 @@ import {
 } from '../../../common/constant/errorMessages';
 import Pubsub from '../events/user.events';
 import Utils from '../../../common/utils/utils';
+import { MongooseObjectId } from '../../../common/types/mongoose.types';
 
 class UsersService implements CRUD {
   /**
@@ -21,7 +23,7 @@ class UsersService implements CRUD {
    * @returns
    */
   async create(resource: CreateUserDto) {
-    // first check if user exit
+    // first check if user exist
     const user = await UsersDao.findOne({ email: resource.email });
     if (user && user.verified) {
       throw new ForbiddenError(emailErrors.emailTakenAndVerified);
@@ -31,7 +33,7 @@ class UsersService implements CRUD {
       const updatedUser = await UsersDao.put(
         { _id: user._id },
         {
-          verifyEmailOtp: Utils.RandomInteger().toString().substring(2, 9),
+          verifyEmailOtp: Utils.RandomInteger().toString().substring(2, 8),
           'meta.updatedAt': Date.now(),
         },
         {
@@ -48,8 +50,17 @@ class UsersService implements CRUD {
       return { message: 'Check your email for verification OTP' };
     }
 
+    const { referredBy, ...rest } = resource;
+    let referrer: MongooseObjectId | undefined = undefined;
+    if (referredBy) {
+      const refUser = await UsersDao.findOne({ referredBy });
+      if (refUser) {
+        referrer = refUser._id;
+      }
+    }
     const newUser = await UsersDao.addUser({
-      ...resource,
+      referredBy: referrer,
+      ...rest,
     });
 
     Pubsub.emit('welcome_to_urrica', {
@@ -134,6 +145,39 @@ class UsersService implements CRUD {
   }
 
   /**
+   *
+   * @param email
+   * @returns
+   */
+  async getVerifyUserOtp(email: string) {
+    const user = await UsersDao.findOne({ email });
+    if (!user) throw new NotFoundError(`User does not exist`);
+
+    if (user && user.verified) {
+      throw new ForbiddenError(emailErrors.emailTakenAndVerified);
+    }
+
+    const updatedUser = await UsersDao.put(
+      { _id: user._id },
+      {
+        verifyEmailOtp: Utils.RandomInteger().toString().substring(2, 8),
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        new: true,
+        upsert: false,
+      },
+    );
+    // send verification email
+    Pubsub.emit('user_signup_otp', {
+      firstName: updatedUser?.firstName,
+      email: updatedUser?.email,
+      otp: updatedUser?.verifyEmailOtp,
+    });
+    return { message: 'Check your email for verification OTP' };
+  }
+
+  /**
    * getPasswordResetOtp
    * @param email
    * @returns
@@ -148,7 +192,7 @@ class UsersService implements CRUD {
       {
         verified: true,
         active: true,
-        resetPasswordPin: Utils.RandomInteger().toString().substring(2, 7),
+        resetPasswordPin: Utils.RandomInteger().toString().substring(2, 8),
         'meta.updatedAt': Date.now(),
       },
       { new: true, upsert: false },

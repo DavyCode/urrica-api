@@ -20,10 +20,14 @@ class UsersDao {
   Schema = mongooseService.getMongoose().Schema;
 
   userSchema = new this.Schema({
-    // _id: String,
     id: String,
     firstName: String,
     lastName: String,
+    profileImage: {
+      type: String,
+      default:
+        'https://res.cloudinary.com/davycode/image/upload/v1590239023/avatar.png',
+    },
     email: {
       type: String,
       unique: true,
@@ -48,6 +52,14 @@ class UsersDao {
     googleSubUserId: { type: String },
     howDidYouHearAboutUs: { type: String },
     referral_code: { type: String },
+    referredBy: {
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    referralRecord: {
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+      ref: 'Referral',
+    },
     meta: {
       createdAt: { type: Date, default: Date.now },
       updatedAt: { type: Date, default: Date.now },
@@ -121,7 +133,7 @@ class UsersDao {
   async addUser(userFields: CreateUserDto) {
     const userId = Utils.generateUniqueId();
     const refcode = Utils.generateReferralCode();
-    const verifyEmailOtp = Utils.RandomInteger().toString().substring(2, 9);
+    const verifyEmailOtp = Utils.RandomInteger().toString().substring(2, 8);
 
     const newUser = await this.User.create({
       id: userId,
