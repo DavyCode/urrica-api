@@ -62,6 +62,7 @@ Pubsub.on('reset_password_otp', async ({ email, otp, firstName }) => {
       });
     }
   } catch (err) {
+    console.log('reset_password_otp==============', err);
     log('error', err);
   }
 });
