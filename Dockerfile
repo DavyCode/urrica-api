@@ -10,8 +10,6 @@ RUN npm install --legacy-peer-deps
 
 COPY . .
 
-RUN npm run clean
-
 RUN npm run build
 # RUN npm start 
 

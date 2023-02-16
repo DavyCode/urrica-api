@@ -7,7 +7,7 @@
     "start:old": "tsc && node ./dist/server.js",
     "debug": "export DEBUG=* && npm start",
     "dev": "NODE_ENV=development export DEBUG=* && tsc-watch --noClear -p ./tsconfig.json --onSuccess \"node ./dist/server.js\"",
-    "build": "NODE_OPTIONS='--max-old-space-size=8192' npx tsc",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' rimraf dist && npx tsc",
     "clean": "rimraf dist",
     "stop:forever": "forever stopall",
     "start:forever": "node start.js",
