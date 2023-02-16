@@ -21,7 +21,7 @@ AWS.config.update({
 });
 
 const ses = new AWS.SES({ apiVersion: '2010-12-01' });
-
+console.log('AWS ses==============', ses);
 const log: debug.IDebugger = debug('app:event-background-process');
 
 class MailerService {
@@ -68,12 +68,18 @@ class MailerService {
 
           try {
             const sendEmail = ses.sendEmail(params).promise();
+            console.log('sendEmail==============', sendEmail);
+
             sendEmail
               .then((data) => {
+                console.log('sendEmail then data==============', data);
+
                 log('email submitted to SES');
                 return resolve(data);
               })
               .catch((error) => {
+                console.log('sendEmail catch==============', error);
+
                 log('message did not deliver', error);
                 return reject(error);
               });
@@ -84,6 +90,8 @@ class MailerService {
         });
       });
     } catch (err) {
+      console.log('MailerService catch==============', err);
+
       log(err);
     }
   }

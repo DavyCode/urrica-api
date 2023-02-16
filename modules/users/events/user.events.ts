@@ -54,14 +54,17 @@ Pubsub.on('user_signup_otp_confirmed', async ({ email, firstName }) => {
 Pubsub.on('reset_password_otp', async ({ email, otp, firstName }) => {
   try {
     if (email) {
-      await MailerServices.sendMailAws({
+      const res = await MailerServices.sendMailAws({
         email,
         otp,
         firstName,
         templateName: 'reset-password-otp',
       });
+      console.log('reset_password_otp catch==============', res);
     }
   } catch (err) {
+    console.log('reset_password_otp catch==============', err);
+
     log('error', err);
   }
 });
