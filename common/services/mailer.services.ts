@@ -21,7 +21,6 @@ AWS.config.update({
 });
 
 const ses = new AWS.SES({ apiVersion: '2010-12-01' });
-console.log('ses==============', ses);
 
 const log: debug.IDebugger = debug('app:event-background-process');
 
@@ -38,10 +37,6 @@ class MailerService {
             Destination: {
               ToAddresses: [email], // Email address/addresses that you want to send your email
               BccAddresses: [LOGS_MAIL],
-              // CcAddresses: [
-              //   LOGS_MAIL,
-              //   /* more items */
-              // ],
             },
             ConfigurationSetName: SES_AWS_CONFIG_SET,
             Message: {
@@ -69,8 +64,6 @@ class MailerService {
 
           try {
             const sendEmail = ses.sendEmail(params).promise();
-            console.log('sendEmail========ss======', sendEmail);
-
             sendEmail
               .then((data) => {
                 console.log('sendEmail then==============', data);
