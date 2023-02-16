@@ -73,14 +73,20 @@ class MailerService {
 
             sendEmail
               .then((data) => {
+                console.log('sendEmail then==============', data);
+
                 log('email submitted to SES');
                 return resolve(data);
               })
               .catch((error) => {
+                console.log('sendEmail catch ==============', error);
+
                 log('message did not deliver', error);
                 return reject(error);
               });
           } catch (error) {
+            console.log('ses sendEmail catch==============', error);
+
             log('could not deliver message', error);
             return reject(error);
           }
