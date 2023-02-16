@@ -1,0 +1,27 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo Entered the pre_build phase...
+      - echo LOGGING into ECR
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 380737955872.dkr.ecr.us-east-1.amazonaws.com
+  build:
+    commands:
+      - echo Entered the build phase...
+      - echo Build started on `date`
+      - echo Build the docker image...
+      - docker build -t urrica-server .
+      - docker tag urrica-server:latest 380737955872.dkr.ecr.us-east-1.amazonaws.com/urrica-server:latest
+  post_build:
+    commands:
+      - echo Entered the post_build phase...
+      - echo Build completed on `date`
+      - echo Pushing the docker image to ECR...
+      - docker push 380737955872.dkr.ecr.us-east-1.amazonaws.com/urrica-server:latest
+      - echo PUSH completed on `date`
+      - echo Writing the imagedefinitions.json file...
+      - printf '[{"name":"urricaServerContainer","imageUri":"%s"}]' 380737955872.dkr.ecr.us-east-1.amazonaws.com/urrica-server:latest > imagedefinitions.json
+      - cat imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
