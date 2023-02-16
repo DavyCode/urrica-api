@@ -69,7 +69,7 @@ class MailerService {
 
           try {
             const sendEmail = ses.sendEmail(params).promise();
-            console.log('sendEmail==============', sendEmail);
+            console.log('sendEmail========ss======', sendEmail);
 
             sendEmail
               .then((data) => {
