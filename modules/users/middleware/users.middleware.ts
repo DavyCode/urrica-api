@@ -35,7 +35,7 @@ class UsersMiddleware {
   ) {
     const user = await usersService.getUserByEmail(req.body.email);
     if (user) {
-      throw new NotFoundError(emailErrors.emailTaken);
+      throw new BadRequestError(emailErrors.emailTaken);
     } else {
       next();
     }
@@ -46,7 +46,7 @@ class UsersMiddleware {
     res: express.Response,
     next: express.NextFunction,
   ) {
-    const user = await usersService.getUserByEmail(req.body.email);
+    const user: any = await usersService.getUserByEmail(req.body.email);
     if (user && user.verified) {
       throw new ForbiddenError(emailErrors.emailTakenAndVerified);
     } else {

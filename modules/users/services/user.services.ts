@@ -24,7 +24,7 @@ class UsersService implements CRUD {
    */
   async create(resource: CreateUserDto) {
     // first check if user exist
-    const user = await UsersDao.findOne({ email: resource.email });
+    const user: any = await UsersDao.findOne({ email: resource.email });
     if (user && user.verified) {
       throw new ForbiddenError(emailErrors.emailTakenAndVerified);
     }
@@ -53,7 +53,7 @@ class UsersService implements CRUD {
     const { referredBy, ...rest } = resource;
     let referrer: MongooseObjectId | undefined = undefined;
     if (referredBy) {
-      const refUser = await UsersDao.findOne({ referredBy });
+      const refUser: any = await UsersDao.findOne({ referredBy });
       if (refUser) {
         referrer = refUser._id;
       }
@@ -150,7 +150,7 @@ class UsersService implements CRUD {
    * @returns
    */
   async getVerifyUserOtp(email: string) {
-    const user = await UsersDao.findOne({ email });
+    const user: any = await UsersDao.findOne({ email });
     if (!user) throw new NotFoundError(`User does not exist`);
 
     if (user && user.verified) {

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { UnauthorizedError } from '../utils/errors';
+import { ForbiddenError, UnauthorizedError } from '../utils/errors';
 import { rolesEnum } from '../constant/enum';
 import accessRolesControl from './accessRolesControl';
 
@@ -32,7 +32,7 @@ class AccessAuthMiddleware {
     }
     if (response.locals.jwt.role !== rolesEnum.SUPER_ADMIN) {
       if (response.locals.jwt.role !== rolesEnum.ADMIN) {
-        throw new UnauthorizedError('Access denied!');
+        throw new ForbiddenError('Access denied!');
       }
     }
     return next();
@@ -47,7 +47,7 @@ class AccessAuthMiddleware {
       throw new UnauthorizedError('Unauthorized');
     }
     if (response.locals.jwt.role !== rolesEnum.SUPER_ADMIN) {
-      throw new UnauthorizedError('Access denied!');
+      throw new ForbiddenError('Access denied!');
     }
     return next();
   }
@@ -64,7 +64,7 @@ class AccessAuthMiddleware {
         .can(response.locals.jwt.role)
         [action](resource);
       if (!permission.granted) {
-        throw new UnauthorizedError(
+        throw new ForbiddenError(
           "You don't have enough permission to perform this action",
         );
       }
@@ -83,7 +83,7 @@ class AccessAuthMiddleware {
     if (response.locals.jwt.role !== rolesEnum.SUPER_ADMIN) {
       if (response.locals.jwt.role !== rolesEnum.ADMIN) {
         if (response.locals.jwt.role !== rolesEnum.SUPPORT) {
-          throw new UnauthorizedError('Access denied');
+          throw new ForbiddenError('Access denied');
         }
       }
     }
@@ -106,7 +106,7 @@ class AccessAuthMiddleware {
       if (role !== rolesEnum.SUPER_ADMIN) {
         if (role !== rolesEnum.ADMIN) {
           if (role !== rolesEnum.SUPPORT) {
-            throw new UnauthorizedError('Access denied');
+            throw new ForbiddenError('Access denied');
           }
         }
       }

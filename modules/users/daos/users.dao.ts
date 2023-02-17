@@ -298,6 +298,11 @@ class UsersDao {
   }
 
   async findOne(query: any) {
+    if (query._id) {
+      if (!mongooseService.validMongooseObjectId(query._id)) {
+        return Promise.resolve(false);
+      }
+    }
     return this.User.findOne(query).exec();
   }
 

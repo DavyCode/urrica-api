@@ -60,11 +60,8 @@ Pubsub.on('reset_password_otp', async ({ email, otp, firstName }) => {
         firstName,
         templateName: 'reset-password-otp',
       });
-      console.log('reset_password_otp catch==============', res);
     }
   } catch (err) {
-    console.log('reset_password_otp catch==============', err);
-
     log('error', err);
   }
 });

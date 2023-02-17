@@ -14,7 +14,7 @@ import { JWT_EXPIRATION_MINUTES, JWT_BEARER } from '../../../config/env';
 
 class AuthService {
   async login(email: string, password: string) {
-    const user = await UsersDao.findOne({ email });
+    const user: any = await UsersDao.findOne({ email });
     if (!user) {
       throw new NotFoundError('User not found');
     }
