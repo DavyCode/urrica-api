@@ -60,6 +60,24 @@ class UsersDao {
       type: mongooseService.getMongoose().Schema.Types.ObjectId,
       ref: 'Referral',
     },
+    state: { type: String },
+    address: { type: String },
+    country: { type: String },
+    gender: { type: String },
+    // phone: {
+    //   type: String,
+    //   unique: true,
+    //   index: true,
+    //   trim: true,
+    //   required: true, // new
+    // },
+    // phoneCountryCode: { type: String },
+    // dateOfBirth: {
+    //   type: String,
+    //   trim: true,
+    //   // match: /^\d{1,2}\/\d{1,2}\/\d{4}$/
+    // },
+    businessName: { type: String, trim: true },
     meta: {
       createdAt: { type: Date, default: Date.now },
       updatedAt: { type: Date, default: Date.now },

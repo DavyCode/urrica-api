@@ -7,6 +7,10 @@ export type User = {
   email?: string;
   firstName?: string;
   lastName?: string;
+  gender?: string;
+  state?: string;
+  address?: string;
+  country?: string;
   profileImage?: string;
   resetPasswordPin?: string;
   passwordHash?: string;

@@ -23,6 +23,7 @@ class AuthValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
