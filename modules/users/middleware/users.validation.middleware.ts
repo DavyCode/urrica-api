@@ -168,10 +168,10 @@ class UsersValidationMiddleware {
     const schema = Joi.object().keys({
       firstName: Joi.string().min(2).required(),
       lastName: Joi.string().min(2).required(),
-      gender: Joi.string().max(20).required(),
-      state: Joi.string().max(20).required(),
-      address: Joi.string().max(60).required(),
-      country: Joi.string().max(20).required(),
+      gender: Joi.string().max(50).required(),
+      state: Joi.string().max(50).required(),
+      address: Joi.string().max(100).required(),
+      country: Joi.string().max(50).required(),
       // phone: Joi.string()
       //   .pattern(new RegExp('^[0-9]'))
       //   .min(5)
