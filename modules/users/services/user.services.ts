@@ -2,7 +2,7 @@ import UsersDao from '../daos/users.dao';
 import { CRUD } from '../../../common/interfaces/crud.interface';
 import { CreateUserDto } from '../dto/create.user.dto';
 import { PutUserDto } from '../dto/put.user.dto';
-import { User } from '../types/user.type';
+import { UserType } from '../types/user.type';
 import {
   BadRequestError,
   ForbiddenError,

@@ -12,7 +12,7 @@ import {
   MongooseUpdateOptions,
 } from '../../../common/types/mongoose.types';
 import Utils from '../../../common/utils/utils';
-import { User } from '../types/user.type';
+import { UserType } from '../types/user.type';
 
 const log: debug.IDebugger = debug('app:users-dao');
 
@@ -255,7 +255,7 @@ class UsersDao {
     userId: string | MongooseObjectId,
     userFields: PutUserDto | PatchUserDto | any,
     option: MongooseUpdateOptions | null,
-  ): Promise<boolean | User> {
+  ): Promise<boolean | UserType> {
     if (!mongooseService.validMongooseObjectId(userId)) {
       return Promise.resolve(false);
     }
@@ -268,7 +268,7 @@ class UsersDao {
       option,
     )
       .select('-passwordHash')
-      .exec()) as User;
+      .exec()) as UserType;
   }
 
   /**
@@ -282,7 +282,7 @@ class UsersDao {
     query: any,
     update: any,
     option: MongooseUpdateOptions,
-  ): Promise<boolean | User | any> {
+  ): Promise<boolean | UserType | any> {
     if (query._id) {
       if (!mongooseService.validMongooseObjectId(query._id)) {
         return Promise.resolve(false);
@@ -297,7 +297,7 @@ class UsersDao {
       option,
     )
       .select('-passwordHash')
-      .exec()) as User;
+      .exec()) as UserType;
   }
 
   /**
@@ -306,13 +306,13 @@ class UsersDao {
    * @returns UserDto
    * @public
    */
-  async getUserById(userId: string): Promise<boolean | User> {
+  async getUserById(userId: string): Promise<boolean | UserType> {
     if (!mongooseService.validMongooseObjectId(userId)) {
       return Promise.resolve(false);
     }
     return (await this.User.findOne({ _id: userId })
       .select('-passwordHash')
-      .exec()) as User;
+      .exec()) as UserType;
   }
 
   async findOne(query: any) {
@@ -324,8 +324,12 @@ class UsersDao {
     return this.User.findOne(query).exec();
   }
 
-  async save(userInstance: User) {
+  async save(userInstance: UserType) {
     return await userInstance.save();
+  }
+
+  async find(query: any) {
+    return await this.User.find(query);
   }
 
   /**

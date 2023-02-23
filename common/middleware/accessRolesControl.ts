@@ -13,15 +13,20 @@ export default (() => {
     .readAny('User')
     .readAny('User')
     .updateAny('User')
-    .createAny('User');
+    .createAny('User')
+    .readAny('Community')
+    .updateAny('Community')
+    .createAny('Community');
 
-  ac.grant(rolesEnum.ADMIN).extend(rolesEnum.SUPPORT);
+  ac.grant(rolesEnum.ADMIN)
+    .extend(rolesEnum.SUPPORT)
+    .deleteAny('User')
+    .deleteAny('Community');
 
   ac.grant(rolesEnum.SUPER_ADMIN)
     .extend(rolesEnum.USER)
     .extend(rolesEnum.SUPPORT)
-    .extend(rolesEnum.ADMIN)
-    .deleteAny('User');
+    .extend(rolesEnum.ADMIN);
 
   return ac as any;
 })();

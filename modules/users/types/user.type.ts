@@ -1,6 +1,6 @@
 import { MongooseObjectId } from '../../../common/types/mongoose.types';
 
-export type User = {
+export type UserType = {
   save(): unknown;
   _id?: MongooseObjectId;
   id?: string;
