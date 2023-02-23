@@ -3,6 +3,7 @@ import debug from 'debug';
 import app, { routes } from './setup/app';
 import { PORT, HOST } from './config/env';
 import { CommonRoutesConfig } from './common/common.routes.config';
+import startups from './setup/startup.setup';
 
 //@ts-expect-error
 const host: string = HOST;
@@ -10,6 +11,8 @@ const port = PORT;
 
 const server: http.Server = http.createServer(app);
 const debugLog: debug.IDebugger = debug('server');
+
+startups();
 
 server.listen(port, () => {
   debugLog(`Server running at ${host}:${port}`);

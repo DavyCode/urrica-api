@@ -17,7 +17,11 @@ export class UsersRoutes extends CommonRoutesConfig {
   configureRoutes(): express.Application {
     this.app
       .route(`${API_BASE_URI}/users`)
-      .get(accessAuthMiddleware.ensureSupport, usersController.getAllUsers)
+      .get(
+        accessAuthMiddleware.ensureSupport,
+        accessAuthMiddleware.grantRoleAccess('readAny', 'User'),
+        usersController.getAllUsers,
+      )
       .post(
         UsersValidationMiddleware.CreateUserValidator,
         usersController.createUser,
@@ -25,30 +29,27 @@ export class UsersRoutes extends CommonRoutesConfig {
 
     // this.app.param(`userId`, UsersMiddleware.extractUserId);
     this.app.param(`${API_BASE_URI}/userId`, UsersMiddleware.extractUserId);
+
     this.app
       .route(`${API_BASE_URI}/users/:userId`)
-      .all(accessAuthMiddleware.ensureAuth)
+      .all(
+        accessAuthMiddleware.ensureAuth,
+        accessAuthMiddleware.allowSameUserOrAdmin,
+      )
       .get(
         accessAuthMiddleware.grantRoleAccess('readOwn', 'User'),
-        accessAuthMiddleware.allowSameUserOrAdmin,
         usersController.getUser,
+      )
+      .put(
+        accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
+        UsersValidationMiddleware.UpdateUserValidator,
+        usersController.updateUser,
+      )
+      .patch(
+        accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
+        UsersValidationMiddleware.UpdateUserValidator,
+        usersController.patchUser,
       );
-
-    this.app.put(`${API_BASE_URI}/users/:userId`, [
-      accessAuthMiddleware.ensureAuth,
-      accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
-      accessAuthMiddleware.allowSameUserOrAdmin,
-      UsersValidationMiddleware.UpdateUserValidator,
-      usersController.updateUser,
-    ]);
-
-    this.app.patch(`${API_BASE_URI}/users/:userId`, [
-      accessAuthMiddleware.ensureAuth,
-      accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
-      accessAuthMiddleware.allowSameUserOrAdmin,
-      UsersValidationMiddleware.UpdateUserValidator,
-      usersController.patchUser,
-    ]);
 
     this.app.get(`${API_BASE_URI}/users/verify/otp/:email`, [
       UsersValidationMiddleware.emailParamsValidator,
@@ -62,8 +63,8 @@ export class UsersRoutes extends CommonRoutesConfig {
 
     this.app.put(`${API_BASE_URI}/users/password/:userId`, [
       accessAuthMiddleware.ensureAuth,
-      accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
       accessAuthMiddleware.allowSameUserOrAdmin,
+      accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
       UsersValidationMiddleware.changePasswordValidator,
       usersController.changePassword,
     ]);

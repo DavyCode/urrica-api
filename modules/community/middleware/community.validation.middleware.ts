@@ -3,18 +3,20 @@ import Joi from 'joi';
 import ServerResponseStatus from '../../../common/constant/ServerResponseStatus';
 import { BadRequestError } from '../../../common/utils/errors';
 
-class AuthValidationMiddleware {
-  async AuthUserValidator(
+class CommunityValidationMiddleware {
+  async CreateCommunityValidator(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
   ) {
-    const schema = Joi.object()
-      .keys({
-        password: Joi.string().min(8).required(),
-        email: Joi.string().email().required(),
-      })
-      .with('email', 'password');
+    const schema = Joi.object().keys({
+      // password: Joi.string().min(8).required(),
+      // email: Joi.string().email().required(),
+      // firstName: Joi.string().min(2).required(),
+      // lastName: Joi.string().min(2).required(),
+      // howDidYouHearAboutUs: Joi.string().min(2).required(),
+      // referredBy: Joi.string(),
+    });
 
     try {
       await schema.validateAsync(req.body);
@@ -29,4 +31,4 @@ class AuthValidationMiddleware {
   }
 }
 
-export default new AuthValidationMiddleware();
+export default new CommunityValidationMiddleware();

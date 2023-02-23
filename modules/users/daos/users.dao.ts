@@ -12,7 +12,7 @@ import {
   MongooseUpdateOptions,
 } from '../../../common/types/mongoose.types';
 import Utils from '../../../common/utils/utils';
-import { User } from '../types/user.type';
+import { UserType } from '../types/user.type';
 
 const log: debug.IDebugger = debug('app:users-dao');
 
@@ -60,6 +60,24 @@ class UsersDao {
       type: mongooseService.getMongoose().Schema.Types.ObjectId,
       ref: 'Referral',
     },
+    state: { type: String },
+    address: { type: String },
+    country: { type: String },
+    gender: { type: String },
+    // phone: {
+    //   type: String,
+    //   unique: true,
+    //   index: true,
+    //   trim: true,
+    //   required: true, // new
+    // },
+    // phoneCountryCode: { type: String },
+    // dateOfBirth: {
+    //   type: String,
+    //   trim: true,
+    //   // match: /^\d{1,2}\/\d{1,2}\/\d{4}$/
+    // },
+    businessName: { type: String, trim: true },
     meta: {
       createdAt: { type: Date, default: Date.now },
       updatedAt: { type: Date, default: Date.now },
@@ -237,7 +255,7 @@ class UsersDao {
     userId: string | MongooseObjectId,
     userFields: PutUserDto | PatchUserDto | any,
     option: MongooseUpdateOptions | null,
-  ): Promise<boolean | User> {
+  ): Promise<boolean | UserType> {
     if (!mongooseService.validMongooseObjectId(userId)) {
       return Promise.resolve(false);
     }
@@ -250,7 +268,7 @@ class UsersDao {
       option,
     )
       .select('-passwordHash')
-      .exec()) as User;
+      .exec()) as UserType;
   }
 
   /**
@@ -264,7 +282,7 @@ class UsersDao {
     query: any,
     update: any,
     option: MongooseUpdateOptions,
-  ): Promise<boolean | User | any> {
+  ): Promise<boolean | UserType | any> {
     if (query._id) {
       if (!mongooseService.validMongooseObjectId(query._id)) {
         return Promise.resolve(false);
@@ -279,7 +297,7 @@ class UsersDao {
       option,
     )
       .select('-passwordHash')
-      .exec()) as User;
+      .exec()) as UserType;
   }
 
   /**
@@ -288,21 +306,30 @@ class UsersDao {
    * @returns UserDto
    * @public
    */
-  async getUserById(userId: string): Promise<boolean | User> {
+  async getUserById(userId: string): Promise<boolean | UserType> {
     if (!mongooseService.validMongooseObjectId(userId)) {
       return Promise.resolve(false);
     }
     return (await this.User.findOne({ _id: userId })
       .select('-passwordHash')
-      .exec()) as User;
+      .exec()) as UserType;
   }
 
   async findOne(query: any) {
+    if (query._id) {
+      if (!mongooseService.validMongooseObjectId(query._id)) {
+        return Promise.resolve(false);
+      }
+    }
     return this.User.findOne(query).exec();
   }
 
-  async save(userInstance: User) {
+  async save(userInstance: UserType) {
     return await userInstance.save();
+  }
+
+  async find(query: any) {
+    return await this.User.find(query);
   }
 
   /**

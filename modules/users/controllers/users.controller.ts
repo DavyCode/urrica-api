@@ -1,5 +1,4 @@
 import { query, Request, Response } from 'express';
-import argon2 from 'argon2';
 import debug from 'debug';
 import usersService from '../services/user.services';
 import {

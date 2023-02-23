@@ -39,6 +39,7 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
@@ -59,6 +60,7 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
@@ -79,6 +81,7 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
@@ -98,6 +101,7 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
@@ -119,6 +123,7 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
@@ -142,6 +147,7 @@ class UsersValidationMiddleware {
           errors: [
             `newPassword ${req.body.newPassword} and confirmPassword ${req.body.confirmPassword} do not match`,
           ],
+          statusCode: ServerResponseStatus.BAD_REQUEST,
         });
       }
       return next();
@@ -149,9 +155,11 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
+
   async UpdateUserValidator(
     req: express.Request,
     res: express.Response,
@@ -160,6 +168,17 @@ class UsersValidationMiddleware {
     const schema = Joi.object().keys({
       firstName: Joi.string().min(2).required(),
       lastName: Joi.string().min(2).required(),
+      gender: Joi.string().max(50).required(),
+      state: Joi.string().max(50).required(),
+      address: Joi.string().max(100).required(),
+      country: Joi.string().max(50).required(),
+      // phone: Joi.string()
+      //   .pattern(new RegExp('^[0-9]'))
+      //   .min(5)
+      //   .max(11)
+      //   .required(),
+      // phoneCountryCode: Joi.string().min(2).required(),
+      // dateOfBirth: Joi.string().max(20).required(),
     });
 
     try {
@@ -170,6 +189,7 @@ class UsersValidationMiddleware {
           errors: [
             `newPassword ${req.body.newPassword} and confirmPassword ${req.body.confirmPassword} do not match`,
           ],
+          statusCode: ServerResponseStatus.BAD_REQUEST,
         });
       }
       return next();
@@ -177,6 +197,7 @@ class UsersValidationMiddleware {
       return res.status(400).json({
         status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
         errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
       });
     }
   }
