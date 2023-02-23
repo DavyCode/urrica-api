@@ -3,7 +3,10 @@ import mongooseService from '../../../common/services/mongoose.services';
 import debug from 'debug';
 import uniqueValidator from 'mongoose-unique-validator';
 import { CreateCommunityPostDto } from '../dto/create.post.community.dto';
-import { CreateCommunityPostCommentDto } from '../dto/create.comment.community.dto';
+import {
+  CreateCommunityPostCommentDto,
+  CreateCommunityCommentsCommentDto,
+} from '../dto/create.comment.community.dto';
 
 import {
   MongooseObjectId,
@@ -12,27 +15,36 @@ import {
 import Utils from '../../../common/utils/utils';
 import { CommunityPostCommentType } from '../types/comments.community.type';
 
-const log: debug.IDebugger = debug('app:community-post-dao');
+const log: debug.IDebugger = debug('app:community-post-comment-dao');
 
 class CommunityPostCommentDao {
   Schema = mongooseService.getMongoose().Schema;
 
   postSchema = new this.Schema({
-    communityId: String,
+    community: {
+      ref: 'Community',
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+    },
     text: String,
-    post: [
-      {
-        ref: 'Post',
-        type: mongooseService.getMongoose().Schema.Types.ObjectId,
-      },
-    ],
+    owner: {
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+      ref: 'User',
+    },
+    post: {
+      ref: 'Post',
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+    },
     comments: [
       {
         ref: 'Comment',
         type: mongooseService.getMongoose().Schema.Types.ObjectId,
       },
     ],
-    isBaseComment: { type: Boolean, default: true },
+    baseComment: {
+      ref: 'Comment',
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+    },
+    isBaseComment: { type: Boolean },
     images: [
       {
         type: String,
@@ -56,7 +68,7 @@ class CommunityPostCommentDao {
     },
   });
 
-  Post = mongooseService.getMongoose().model('Post', this.postSchema);
+  Comment = mongooseService.getMongoose().model('Comment', this.postSchema);
 
   constructor() {
     log('Created new instance of CommunityDao');
@@ -96,7 +108,7 @@ class CommunityPostCommentDao {
         return Promise.resolve(false);
       }
     }
-    return (await this.Post.findOneAndUpdate(
+    return (await this.Comment.findOneAndUpdate(
       query,
       {
         $set: update,
@@ -116,7 +128,7 @@ class CommunityPostCommentDao {
     if (!mongooseService.validMongooseObjectId(id)) {
       return Promise.resolve(false);
     }
-    return (await this.Post.findOne({
+    return (await this.Comment.findOne({
       _id: id,
     }).exec()) as CommunityPostCommentType;
   }
@@ -127,7 +139,7 @@ class CommunityPostCommentDao {
         return Promise.resolve(false);
       }
     }
-    return this.Post.findOne(query).exec();
+    return this.Comment.findOne(query).exec();
   }
 
   async save(postInstance: CommunityPostCommentType) {
@@ -135,11 +147,13 @@ class CommunityPostCommentDao {
   }
 
   async find(query: any) {
-    return await this.Post.find(query);
+    return await this.Comment.find(query);
   }
 
-  async create(items: CreateCommunityPostCommentDto) {
-    return await this.Post.create(items);
+  async create(
+    items: CreateCommunityPostCommentDto | CreateCommunityCommentsCommentDto,
+  ) {
+    return await this.Comment.create(items);
   }
 
   /**
@@ -148,11 +162,173 @@ class CommunityPostCommentDao {
    * @public
    */
   async getTotalCount() {
-    return this.Post.estimatedDocumentCount().exec();
+    return this.Comment.estimatedDocumentCount().exec();
   }
 
   async getAll(query: any) {
-    return this.Post.find(query).exec();
+    return this.Comment.find(query).exec();
+  }
+
+  async deleteManyByPost(commentId: string) {
+    this.Comment.deleteMany({ post: commentId }).exec();
+  }
+
+  async findByIdAndAddtoList(
+    commentId: string,
+    update: any,
+    option: MongooseUpdateOptions,
+  ) {
+    if (!mongooseService.validMongooseObjectId(commentId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(update.userId)) {
+      return Promise.resolve(false);
+    }
+
+    return (await this.Comment.findOneAndUpdate(
+      { _id: commentId },
+      {
+        $push: update,
+        'meta.updatedAt': Date.now(),
+      },
+      option,
+    ).exec()) as CommunityPostCommentType;
+  }
+
+  async findByIdAndRemoveFromList(
+    commentId: string,
+    update: any,
+    option: MongooseUpdateOptions,
+  ) {
+    if (!mongooseService.validMongooseObjectId(commentId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(update.userId)) {
+      return Promise.resolve(false);
+    }
+
+    return (await this.Comment.findOneAndUpdate(
+      { _id: commentId },
+      {
+        $pull: update,
+        'meta.updatedAt': Date.now(),
+      },
+      option,
+    ).exec()) as CommunityPostCommentType;
+  }
+
+  async getAllCommentOfAPost(postId: string, query?: any) {
+    if (!mongooseService.validMongooseObjectId(postId)) {
+      return Promise.resolve(false);
+    }
+
+    const paginate = { skip: 0, limit: 10 };
+
+    if (query && query.skip && query.limit) {
+      paginate.skip = Number(query.skip);
+      paginate.limit = Number(query.limit);
+    }
+
+    const filterParams = { ...query };
+
+    if (query.date) {
+      filterParams['meta.createdAt'] = {
+        $gte: new Date(new Date(query.date).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(query.date).setHours(23, 59, 59)),
+      };
+    }
+
+    if (query.startDate && query.endDate) {
+      filterParams['meta.createdAt'] = {
+        $gte: new Date(new Date(query.startDate).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(query.endDate).setHours(23, 59, 59)),
+      };
+    }
+
+    const { skip, limit, date, endDate, startDate, search, ...rest } =
+      filterParams;
+
+    const data = await this.Comment.find({
+      post: postId,
+      isBaseComment: true,
+      ...rest,
+    })
+      .limit(paginate.limit)
+      .skip(paginate.skip)
+      .sort({ 'meta.createdAt': -1 })
+      .select('-passwordHash')
+      .exec();
+
+    const totalDocumentCount = await this.Comment.countDocuments({
+      post: postId,
+      isBaseComment: true,
+      ...rest,
+    });
+
+    return Promise.resolve({
+      comments: data,
+      totalDocumentCount,
+      skip: paginate.skip,
+      limit: paginate.limit,
+      queryWith: query,
+    });
+  }
+
+  async getAllCommentOfAComment(commentId: string, query?: any) {
+    if (!mongooseService.validMongooseObjectId(commentId)) {
+      return Promise.resolve(false);
+    }
+    const paginate = { skip: 0, limit: 10 };
+
+    if (query && query.skip && query.limit) {
+      paginate.skip = Number(query.skip);
+      paginate.limit = Number(query.limit);
+    }
+    const filterParams = { ...query };
+
+    if (query.date) {
+      filterParams['meta.createdAt'] = {
+        $gte: new Date(new Date(query.date).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(query.date).setHours(23, 59, 59)),
+      };
+    }
+
+    if (query.startDate && query.endDate) {
+      filterParams['meta.createdAt'] = {
+        $gte: new Date(new Date(query.startDate).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(query.endDate).setHours(23, 59, 59)),
+      };
+    }
+
+    const { skip, limit, date, endDate, startDate, search, ...rest } =
+      filterParams;
+
+    const data = await this.Comment.find({
+      baseComment: commentId,
+      isBaseComment: false,
+      ...rest,
+    })
+      .limit(paginate.limit)
+      .skip(paginate.skip)
+      .sort({ 'meta.createdAt': -1 })
+      .select('-passwordHash')
+      .exec();
+
+    const totalDocumentCount = await this.Comment.countDocuments({
+      baseComment: commentId,
+      isBaseComment: false,
+      ...rest,
+    });
+
+    return Promise.resolve({
+      comments: data,
+      totalDocumentCount,
+      skip: paginate.skip,
+      limit: paginate.limit,
+      queryWith: query,
+    });
   }
 }
 

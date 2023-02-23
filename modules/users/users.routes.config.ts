@@ -17,8 +17,11 @@ export class UsersRoutes extends CommonRoutesConfig {
   configureRoutes(): express.Application {
     this.app
       .route(`${API_BASE_URI}/users`)
-      .get(
+      .all(
         accessAuthMiddleware.ensureSupport,
+        UsersMiddleware.validateAuthUserExist,
+      )
+      .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'User'),
         usersController.getAllUsers,
       )
@@ -34,6 +37,7 @@ export class UsersRoutes extends CommonRoutesConfig {
       .route(`${API_BASE_URI}/users/:userId`)
       .all(
         accessAuthMiddleware.ensureAuth,
+        UsersMiddleware.validateAuthUserExist,
         accessAuthMiddleware.allowSameUserOrAdmin,
       )
       .get(
@@ -63,6 +67,7 @@ export class UsersRoutes extends CommonRoutesConfig {
 
     this.app.put(`${API_BASE_URI}/users/password/:userId`, [
       accessAuthMiddleware.ensureAuth,
+      UsersMiddleware.validateAuthUserExist,
       accessAuthMiddleware.allowSameUserOrAdmin,
       accessAuthMiddleware.grantRoleAccess('updateOwn', 'User'),
       UsersValidationMiddleware.changePasswordValidator,

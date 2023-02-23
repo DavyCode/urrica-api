@@ -18,7 +18,10 @@ class CommunityPostDao {
   Schema = mongooseService.getMongoose().Schema;
 
   postSchema = new this.Schema({
-    communityId: String,
+    community: {
+      type: mongooseService.getMongoose().Schema.Types.ObjectId,
+      ref: 'Community',
+    },
     title: String,
     text: String,
     owner: {
@@ -117,6 +120,11 @@ class CommunityPostDao {
     return (await this.Post.findOne({ _id: id }).exec()) as CommunityPostType;
   }
 
+  /**
+   * findOne
+   * @param query
+   * @returns
+   */
   async findOne(query: any) {
     if (query._id) {
       if (!mongooseService.validMongooseObjectId(query._id)) {
@@ -130,12 +138,36 @@ class CommunityPostDao {
     return await postInstance.save();
   }
 
+  /**
+   * find
+   * @param query
+   * @returns
+   */
   async find(query: any) {
     return await this.Post.find(query);
   }
 
+  /**
+   * create
+   * @param items
+   * @returns
+   */
   async create(items: CreateCommunityPostDto) {
     return await this.Post.create(items);
+  }
+
+  /**
+   * delete
+   * @param postId
+   * @returns
+   */
+  async delete(postId: string) {
+    if (postId) {
+      if (!mongooseService.validMongooseObjectId(postId)) {
+        return Promise.resolve(false);
+      }
+    }
+    return await this.Post.findOneAndDelete({ _id: postId });
   }
 
   /**
@@ -147,8 +179,101 @@ class CommunityPostDao {
     return this.Post.estimatedDocumentCount().exec();
   }
 
-  async getAll(query: any) {
-    return this.Post.find(query).exec();
+  /**
+   * getAll
+   * @param query
+   * @returns
+   */
+  async getAll(query?: any) {
+    const paginate = { skip: 0, limit: 10 };
+
+    if (query && query.skip && query.limit) {
+      paginate.skip = Number(query.skip);
+      paginate.limit = Number(query.limit);
+    }
+
+    const filterParams = { ...query };
+
+    if (query.date) {
+      filterParams['meta.createdAt'] = {
+        $gte: new Date(new Date(query.date).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(query.date).setHours(23, 59, 59)),
+      };
+    }
+
+    if (query.startDate && query.endDate) {
+      filterParams['meta.createdAt'] = {
+        $gte: new Date(new Date(query.startDate).setHours(0o0, 0o0, 0o0)),
+        $lt: new Date(new Date(query.endDate).setHours(23, 59, 59)),
+      };
+    }
+
+    const { skip, limit, date, endDate, startDate, search, ...rest } =
+      filterParams;
+
+    const data = await this.Post.find({ ...rest })
+      .limit(paginate.limit)
+      .skip(paginate.skip)
+      .sort({ 'meta.createdAt': -1 })
+      .exec();
+
+    const totalDocumentCount = await this.Post.countDocuments({
+      ...rest,
+    });
+
+    return Promise.resolve({
+      posts: data,
+      totalDocumentCount,
+      skip: paginate.skip,
+      limit: paginate.limit,
+      queryWith: query,
+    });
+  }
+
+  async findByIdAndAddtoList(
+    postId: string,
+    update: any,
+    option: MongooseUpdateOptions,
+  ) {
+    if (!mongooseService.validMongooseObjectId(postId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(update.userId)) {
+      return Promise.resolve(false);
+    }
+
+    return (await this.Post.findOneAndUpdate(
+      { _id: postId },
+      {
+        $push: update,
+        'meta.updatedAt': Date.now(),
+      },
+      option,
+    ).exec()) as CommunityPostType;
+  }
+
+  async findByIdAndRemoveFromList(
+    postId: string,
+    update: any,
+    option: MongooseUpdateOptions,
+  ) {
+    if (!mongooseService.validMongooseObjectId(postId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(update.userId)) {
+      return Promise.resolve(false);
+    }
+
+    return (await this.Post.findOneAndUpdate(
+      { _id: postId },
+      {
+        $pull: update,
+        'meta.updatedAt': Date.now(),
+      },
+      option,
+    ).exec()) as CommunityPostType;
   }
 }
 

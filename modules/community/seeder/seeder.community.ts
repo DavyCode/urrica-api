@@ -4,7 +4,7 @@ import { InternalServerError } from '../../../common/utils/errors';
 const log: debug.IDebugger = debug('app:Community-dao');
 
 export default (CommunityDao: any) => {
-  Promise.resolve(CommunityDao.find({}))
+  Promise.resolve(CommunityDao.find({ communityId: 'URRICA_COM_0001' }))
     .then((community: any) => {
       if (community && community.length > 0) {
         log("======Community Already exist, don't seed=====", community.length);

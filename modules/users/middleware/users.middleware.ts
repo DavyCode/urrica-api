@@ -15,7 +15,7 @@ import {
 const log: debug.IDebugger = debug('app:users-controller-middleware');
 
 class UsersMiddleware {
-  async validateUserExists(
+  async validateUserExist(
     req: express.Request,
     res: express.Response,
     next: express.NextFunction,
@@ -25,6 +25,19 @@ class UsersMiddleware {
       next();
     } else {
       throw new NotFoundError(userErrors.userIdNotFound);
+    }
+  }
+
+  async validateAuthUserExist(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) {
+    const user = await usersService.getById(res.locals.jwt.userId);
+    if (user) {
+      next();
+    } else {
+      throw new NotFoundError(userErrors.userNotFoundError);
     }
   }
 

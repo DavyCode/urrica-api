@@ -21,4 +21,5 @@ export const emailErrors = {
 export const userErrors = {
   invalidUserId: 'User ID is invalid',
   userIdNotFound: 'User ID not found',
+  userNotFoundError: 'User not found',
 };

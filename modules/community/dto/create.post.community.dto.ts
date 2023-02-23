@@ -1,8 +1,9 @@
 import { MongooseObjectId } from '../../../common/types/mongoose.types';
 
 export interface CreateCommunityPostDto {
-  communityId: MongooseObjectId;
-  title: string;
+  owner?: MongooseObjectId;
+  community?: MongooseObjectId;
+  title?: string;
   text: string;
-  images: Array<string | unknown>;
+  images?: Array<string | unknown>;
 }

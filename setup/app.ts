@@ -10,11 +10,12 @@ import hpp from 'hpp';
 import xss from 'xss-clean';
 import mongoSanitize from 'express-mongo-sanitize';
 import { CommonRoutesConfig } from '../common/common.routes.config';
-import { UsersRoutes } from '../modules/users/users.routes.config';
-import { AuthRoutes } from '../modules/auth/auth.routes.config';
 import headerOptions from '../setup/headerOptions';
 import checkHeaders from '../common/middleware/checkHeaders';
 import { errorHandler } from '../common/utils/errors';
+import { UsersRoutes } from '../modules/users/users.routes.config';
+import { AuthRoutes } from '../modules/auth/auth.routes.config';
+import { CommunityRoutes } from '../modules/community/community.routes.config';
 
 const app: express.Application = express();
 const routes: Array<CommonRoutesConfig> = [];
@@ -31,17 +32,17 @@ app.use(hpp()); // <- THIS IS THE NEW LINE
 
 app.use(cors());
 /**
-	* req.ip and req.protocol are now set to ip and protocol of the client, not the ip and protocol of the reverse proxy server       req.headers['x-forwarded-for'] is not changed
-	 req.headers['x-forwarded-for'] contains more than 1 forwarder when
-	 there are more forwarders between the client and nodejs.
-	 Forwarders can also be spoofed by the client, but
-	 app.set('trust proxy') selects the correct client ip from the list
-	 if the nodejs server is called directly, bypassing the trusted proxies,
-	 then 'trust proxy' ignores x-forwarded-for headers and
-	 sets req.ip to the remote client ip address
-	 app.enable('trust proxy');
-	* only if you're behind a reverse proxy (Heroku, Bluemix, AWS if you use an ELB, custom Nginx setup, etc)
-	*/
+ * req.ip and req.protocol are now set to ip and protocol of the client, not the ip and protocol of the reverse proxy server       req.headers['x-forwarded-for'] is not changed
+ * req.headers['x-forwarded-for'] contains more than 1 forwarder when
+ * there are more forwarders between the client and nodejs.
+ * Forwarders can also be spoofed by the client, but
+ * app.set('trust proxy') selects the correct client ip from the list
+ * if the nodejs server is called directly, bypassing the trusted proxies,
+ * then 'trust proxy' ignores x-forwarded-for headers and
+ * sets req.ip to the remote client ip address
+ * app.enable('trust proxy');
+ * only if you're behind a reverse proxy (Heroku, Bluemix, AWS if you use an ELB, custom Nginx setup, etc)
+ */
 app.enable('trust proxy');
 
 /**
@@ -92,6 +93,7 @@ app.use(expressWinston.logger(loggerOptions));
 
 routes.push(new UsersRoutes(app));
 routes.push(new AuthRoutes(app));
+routes.push(new CommunityRoutes(app));
 
 app.get(`/`, (req: express.Request, res: express.Response) => {
   res.status(200).send('Full authentication is required');

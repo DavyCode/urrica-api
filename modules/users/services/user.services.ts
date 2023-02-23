@@ -85,7 +85,7 @@ class UsersService implements CRUD {
     });
 
     if (!user) {
-      throw new NotFoundError(`User ${id} not found`); //TODO: don't send user ID to frontend
+      throw new NotFoundError(`User not found`); //TODO: don't send user ID to frontend
     }
 
     return { user, message: 'Update successful' };
