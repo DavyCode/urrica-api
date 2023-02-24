@@ -126,7 +126,10 @@ class CommunityDao {
     return this.Community.find(query).exec();
   }
 
-  async findByIdOrName(query: { communityId: string; communityName: string }) {
+  async findByIdOrName(query: {
+    communityId?: string;
+    communityName?: string;
+  }) {
     return this.Community.find({
       $or: [
         { communityId: query.communityId },

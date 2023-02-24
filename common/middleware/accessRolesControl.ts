@@ -4,7 +4,7 @@ import { rolesEnum } from '../constant/enum';
 const ac: AccessControl = new AccessControl();
 
 export default (() => {
-  ac.grant(rolesEnum.USER).readOwn('User').updateOwn('User');
+  ac.grant(rolesEnum.USER).readOwn('User').updateOwn('User').readAny('Post');
 
   ac.grant(rolesEnum.AGENT).extend(rolesEnum.USER);
 

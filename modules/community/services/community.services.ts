@@ -26,15 +26,19 @@ class CommunityService implements CRUD {
    * @returns
    */
   async create(resource: CreateCommunityDto) {
-    const initialCommunity = await CommunityDao.findByIdOrName({
-      communityId: resource.communityId,
+    const initialCommunity = await CommunityDao.findOne({
+      // communityId: resource.communityId,
       communityName: resource.communityName,
     });
+
     if (initialCommunity) {
       throw new ForbiddenError('Cannot duplicate community ID or Name');
     }
 
-    const newCommunity = await CommunityDao.create(resource);
+    const newCommunity = await CommunityDao.create({
+      ...resource,
+      communityId: Utils.generateUniqueId(),
+    });
     return { message: 'Community created', newCommunity };
   }
 
@@ -89,18 +93,17 @@ class CommunityService implements CRUD {
 
   async deletePost(postId: string) {
     const deletedPost = await PostDao.delete(postId);
-
     if (deletedPost) {
       // find all its comments and delete
       await this.deleteAssociatedComments(postId);
     }
-    return { message: 'Community created', deletedPost };
+    return { message: 'Post deleted', deletedPost };
   }
 
   async getPost(postId: string) {
     const post = await PostDao.getById(postId);
 
-    if (post) {
+    if (!post) {
       throw new NotFoundError('Post not found');
     }
 
@@ -217,8 +220,8 @@ class CommunityService implements CRUD {
 
   async commentOnAPost(
     postId: string,
-    userId: MongooseObjectId,
     resource: CreateCommunityPostCommentDto,
+    userId: MongooseObjectId,
   ) {
     if (!resource.isBaseComment) {
       throw new ForbiddenError('Only base comments allowed');
@@ -226,39 +229,43 @@ class CommunityService implements CRUD {
 
     const post: any = await PostDao.findOne({ _id: postId });
     if (!post) {
-      throw new NotFoundError('Post not found');
+      throw new NotFoundError('Post not found!');
     }
 
     const baseCommunity: any = await CommunityDao.findOne({
       communityId: 'URRICA_COM_0001',
     });
+
     if (!baseCommunity) {
       throw new NotFoundError('Base Community not found');
     }
+
     const newComment = await CommentDao.create({
       community: baseCommunity._id,
       post: post._id,
       ...resource,
       isBaseComment: true,
+      owner: userId,
     });
 
     await this.addCommentToPostCommentList(post._id, newComment._id);
-    return { message: 'Comment created', newComment };
+    return { message: 'Comment created', comment: newComment };
   }
 
   async commentOnAComment(
     postId: string,
     baseCommentId: string,
-    userId: MongooseObjectId,
     resource: CreateCommunityCommentsCommentDto,
+    userId: MongooseObjectId,
   ) {
     if (resource.isBaseComment) {
       throw new ForbiddenError('Can only comment on a comment');
     }
 
     const post: any = await PostDao.findOne({ _id: postId });
+
     if (!post) {
-      throw new NotFoundError('Post not found');
+      throw new NotFoundError('Post not found!!');
     }
 
     const baseCommunity: any = await CommunityDao.findOne({
@@ -273,7 +280,7 @@ class CommunityService implements CRUD {
       _id: baseCommentId,
     });
     if (!baseComment) {
-      throw new NotFoundError('Base Comment not found');
+      throw new NotFoundError('Base Comment not found!!!');
     }
 
     const newComment = await CommentDao.create({
@@ -282,10 +289,11 @@ class CommunityService implements CRUD {
       baseComment: baseComment._id,
       ...resource,
       isBaseComment: false,
+      owner: userId,
     });
 
     await this.addToBaseCommentList(baseComment._id, newComment._id);
-    return { message: 'Comment added', newComment };
+    return { message: 'Comment added', comment: newComment };
   }
 
   async addCommentToPostCommentList(
@@ -301,10 +309,10 @@ class CommunityService implements CRUD {
     );
 
     if (!updatedPost) {
-      throw new NotFoundError('Post not found');
+      throw new NotFoundError('Post not found!!');
     }
 
-    return { updatedPost, message: 'Comment added to post' };
+    return { post: updatedPost, message: 'Comment added to post' };
   }
 
   async removeCommentFromPostCommentList(
@@ -323,7 +331,7 @@ class CommunityService implements CRUD {
       throw new NotFoundError('Post not found');
     }
 
-    return { updatedPost, message: 'Comment removed from post' };
+    return { post: updatedPost, message: 'Comment removed from post' };
   }
 
   async addToBaseCommentList(
@@ -342,7 +350,10 @@ class CommunityService implements CRUD {
       throw new NotFoundError('Base comment not found');
     }
 
-    return { updatedComment, message: 'Comment added to list of comments' };
+    return {
+      comment: updatedComment,
+      message: 'Comment added to list of comments',
+    };
   }
 
   async removeFromBaseCommentList(
@@ -361,7 +372,10 @@ class CommunityService implements CRUD {
       throw new NotFoundError('Base comment not found');
     }
 
-    return { updatedComment, message: 'Comment removed to list of comments' };
+    return {
+      comment: updatedComment,
+      message: 'Comment removed to list of comments',
+    };
   }
 
   async getAllCommentOfAPost(postId: string, query?: any) {

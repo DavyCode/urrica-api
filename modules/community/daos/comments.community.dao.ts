@@ -182,8 +182,10 @@ class CommunityPostCommentDao {
       return Promise.resolve(false);
     }
 
-    if (!mongooseService.validMongooseObjectId(update.userId)) {
-      return Promise.resolve(false);
+    if (update.userId) {
+      if (!mongooseService.validMongooseObjectId(update.userId)) {
+        return Promise.resolve(false);
+      }
     }
 
     return (await this.Comment.findOneAndUpdate(
@@ -205,8 +207,10 @@ class CommunityPostCommentDao {
       return Promise.resolve(false);
     }
 
-    if (!mongooseService.validMongooseObjectId(update.userId)) {
-      return Promise.resolve(false);
+    if (update.userId) {
+      if (!mongooseService.validMongooseObjectId(update.userId)) {
+        return Promise.resolve(false);
+      }
     }
 
     return (await this.Comment.findOneAndUpdate(

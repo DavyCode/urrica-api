@@ -2,12 +2,12 @@ import express from 'express';
 import { CommonRoutesConfig } from '../../common/common.routes.config';
 import communityController from './controllers/community.controller';
 import CommunityMiddleware from './middleware/community.middleware';
-import CommunityValidationMiddleware from './middleware/community.validation.middleware';
 import UsersMiddleware from '../users/middleware/users.middleware';
 import { API_BASE_URI } from '../../config/env';
 import accessAuthMiddleware from '../../common/middleware/accessAuth.middleware';
 import postValidationMiddleware from './middleware/post.validation.middleware';
 import commentValidationMiddleware from './middleware/comment.validation.middleware';
+import communityValidationMiddleware from './middleware/community.validation.middleware';
 
 export class CommunityRoutes extends CommonRoutesConfig {
   constructor(app: express.Application) {
@@ -21,23 +21,21 @@ export class CommunityRoutes extends CommonRoutesConfig {
     this.app
       .route(`${API_BASE_URI}/communities`)
       .all(
-        accessAuthMiddleware.ensureAuth,
+        accessAuthMiddleware.ensureSupport,
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
-        accessAuthMiddleware.ensureSupport,
         accessAuthMiddleware.grantRoleAccess('readAny', 'Community'),
         communityController.getAllCommunities,
       )
       .post(
-        accessAuthMiddleware.ensureSupport,
-        accessAuthMiddleware.grantRoleAccess('readAny', 'Community'),
+        accessAuthMiddleware.grantRoleAccess('createAny', 'Community'),
+        communityValidationMiddleware.CreateCommunityValidator,
         communityController.create,
       )
       .put() // TODO:
       .patch(); // TODO:
 
-    // this.app.param(`userId`, UsersMiddleware.extractUserId);
     this.app.param(
       `${API_BASE_URI}/posts/postId`,
       CommunityMiddleware.extractPostId,
@@ -70,7 +68,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
-        accessAuthMiddleware.grantRoleAccess('readAny', 'Community'),
+        accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
         communityController.getPost,
       )
       .delete(
@@ -114,11 +112,11 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         postValidationMiddleware.postParamsValidator,
-        communityController.getAllCommentOfAPost,
+        communityController.getAllCommentOfAPost, // √√
       )
       .post(
         commentValidationMiddleware.CreateCommentValidator,
-        communityController.commentOnAPost,
+        communityController.commentOnAPost, // √√
       )
       .put() // TODO:
       .delete(); // TODO:
@@ -136,7 +134,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .post(
         commentValidationMiddleware.CreateCommentValidator,
-        communityController.commentOnAComment,
+        communityController.commentOnAComment, // √√
       );
 
     this.app

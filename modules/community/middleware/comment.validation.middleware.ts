@@ -32,7 +32,7 @@ class CommentValidationMiddleware {
     next: express.NextFunction,
   ) {
     const schema = Joi.object().keys({
-      commentId: Joi.string().email().required(),
+      commentId: Joi.string().min(8).required(),
     });
 
     try {

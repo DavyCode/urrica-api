@@ -9,6 +9,7 @@ export interface CreateCommunityPostCommentDto {
   // baseComment?: MongooseObjectId;
   // comments: Array<unknown>;
   images?: Array<string | unknown>;
+  owner: MongooseObjectId;
 }
 
 export interface CreateCommunityCommentsCommentDto {

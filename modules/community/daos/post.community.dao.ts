@@ -167,7 +167,8 @@ class CommunityPostDao {
         return Promise.resolve(false);
       }
     }
-    return await this.Post.findOneAndDelete({ _id: postId });
+    // return await this.Post.findByIdAndDelete({ _id: postId });
+    return await this.Post.findByIdAndDelete(postId);
   }
 
   /**
@@ -239,8 +240,10 @@ class CommunityPostDao {
       return Promise.resolve(false);
     }
 
-    if (!mongooseService.validMongooseObjectId(update.userId)) {
-      return Promise.resolve(false);
+    if (update.userId) {
+      if (!mongooseService.validMongooseObjectId(update.userId)) {
+        return Promise.resolve(false);
+      }
     }
 
     return (await this.Post.findOneAndUpdate(

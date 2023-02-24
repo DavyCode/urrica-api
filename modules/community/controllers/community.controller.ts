@@ -42,7 +42,7 @@ class CommunityController {
 
   async deletePost(req: Request, res: Response): Promise<void> {
     const { message, ...rest } = await communityService.deletePost(
-      req.body.postId,
+      req.params.postId,
     );
     const controllerRes = new apiOKResponse(rest, message);
     res.status(controllerRes.statusCode).send(controllerRes);
@@ -108,8 +108,8 @@ class CommunityController {
 
   async commentOnAComment(req: Request, res: Response): Promise<void> {
     const { message, ...rest } = await communityService.commentOnAComment(
-      req.params.commentId,
       req.params.postId,
+      req.params.commentId,
       req.body,
       res.locals.jwt.userId,
     );

@@ -31,7 +31,7 @@ class PostValidationMiddleware {
     next: express.NextFunction,
   ) {
     const schema = Joi.object().keys({
-      postId: Joi.string().email().required(),
+      postId: Joi.string().min(8).required(),
     });
 
     try {

@@ -10,12 +10,7 @@ class CommunityValidationMiddleware {
     next: express.NextFunction,
   ) {
     const schema = Joi.object().keys({
-      // password: Joi.string().min(8).required(),
-      // email: Joi.string().email().required(),
-      // firstName: Joi.string().min(2).required(),
-      // lastName: Joi.string().min(2).required(),
-      // howDidYouHearAboutUs: Joi.string().min(2).required(),
-      // referredBy: Joi.string(),
+      communityName: Joi.string().min(4).required(),
     });
 
     try {
