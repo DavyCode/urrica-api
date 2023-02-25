@@ -17,11 +17,10 @@ export class UsersRoutes extends CommonRoutesConfig {
   configureRoutes(): express.Application {
     this.app
       .route(`${API_BASE_URI}/users`)
-      .all(
-        accessAuthMiddleware.ensureSupport,
-        UsersMiddleware.validateAuthUserExist,
-      )
+      .all()
       .get(
+        UsersMiddleware.validateAuthUserExist,
+        accessAuthMiddleware.ensureSupport,
         accessAuthMiddleware.grantRoleAccess('readAny', 'User'),
         usersController.getAllUsers,
       )

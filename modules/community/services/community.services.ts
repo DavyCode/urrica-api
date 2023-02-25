@@ -138,13 +138,10 @@ class CommunityService implements CRUD {
   }
 
   async upvotePost(postId: string, userId: MongooseObjectId) {
-    const post = await PostDao.findByIdAndAddtoList(
-      postId,
-      {
-        upvotes: userId,
-      },
-      { upsert: true, new: true },
-    );
+    // A user cannot upvote & downvote at the same time
+    // if a user upvote, remove them from downvote, vise versa
+    // When a user upvote remove them from upvote list
+    const post = await PostDao.upvotePost(postId, userId);
 
     if (!post) {
       throw new NotFoundError('Post not found');
@@ -154,13 +151,10 @@ class CommunityService implements CRUD {
   }
 
   async downvotePost(postId: string, userId: MongooseObjectId) {
-    const post = await PostDao.findByIdAndRemoveFromList(
-      postId,
-      {
-        upvotes: userId,
-      },
-      { upsert: true, new: true },
-    );
+    // A user cannot upvote & downvote at the same time
+    // if a user upvote, remove them from downvote, vise versa
+    // When a  user downvote remove them from upvote list
+    const post = await PostDao.downvotePost(postId, userId);
 
     if (!post) {
       throw new NotFoundError('Post not found');
@@ -284,10 +278,10 @@ class CommunityService implements CRUD {
     }
 
     const newComment = await CommentDao.create({
+      ...resource,
       community: baseCommunity._id,
       post: post._id,
       baseComment: baseComment._id,
-      ...resource,
       isBaseComment: false,
       owner: userId,
     });
@@ -387,13 +381,10 @@ class CommunityService implements CRUD {
   }
 
   async upvoteComment(commentId: string, userId: MongooseObjectId) {
-    const post = await CommentDao.findByIdAndAddtoList(
-      commentId,
-      {
-        upvotes: userId,
-      },
-      { upsert: true, new: true },
-    );
+    // A user cannot upvote & downvote at the same time
+    // if a user upvote, remove them from downvote, vise versa
+    // When a  user downvote remove them from upvote list
+    const post = await CommentDao.upvoteComment(commentId, userId);
 
     if (!post) {
       throw new NotFoundError('Post not found');
@@ -403,13 +394,10 @@ class CommunityService implements CRUD {
   }
 
   async downvoteComment(commentId: string, userId: MongooseObjectId) {
-    const post = await CommentDao.findByIdAndRemoveFromList(
-      commentId,
-      {
-        upvotes: userId,
-      },
-      { upsert: true, new: true },
-    );
+    // A user cannot upvote & downvote at the same time
+    // if a user upvote, remove them from downvote, vise versa
+    // When a user upvotes remove them from downvote list
+    const post = await CommentDao.downvoteComment(commentId, userId);
 
     if (!post) {
       throw new NotFoundError('Post not found');

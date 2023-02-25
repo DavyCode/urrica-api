@@ -26,12 +26,12 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'Community'),
-        communityController.getAllCommunities,
+        communityController.getAllCommunities, // √√
       )
       .post(
         accessAuthMiddleware.grantRoleAccess('createAny', 'Community'),
         communityValidationMiddleware.CreateCommunityValidator,
-        communityController.create,
+        communityController.create, // √√
       )
       .put() // TODO:
       .patch(); // TODO:
@@ -54,11 +54,11 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'Community'),
-        communityController.getAllPost,
+        communityController.getAllPost, // √√
       )
       .post(
         postValidationMiddleware.CreatePostValidator,
-        communityController.createPost,
+        communityController.createPost, // √√
       );
 
     this.app
@@ -69,11 +69,11 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
-        communityController.getPost,
+        communityController.getPost, // √√
       )
       .delete(
         postValidationMiddleware.postParamsValidator,
-        communityController.deletePost,
+        communityController.deletePost, // √√
       )
       .patch(
         postValidationMiddleware.CreatePostValidator,
@@ -86,14 +86,12 @@ export class CommunityRoutes extends CommonRoutesConfig {
         communityController.putPost,
       );
 
-    this.app
-      .route(`${API_BASE_URI}/posts/:postId/upvote`)
-      .put(
-        accessAuthMiddleware.ensureAuth,
-        UsersMiddleware.validateAuthUserExist,
-        postValidationMiddleware.postParamsValidator,
-        communityController.upvotePost,
-      );
+    this.app.route(`${API_BASE_URI}/posts/:postId/upvote`).put(
+      accessAuthMiddleware.ensureAuth,
+      UsersMiddleware.validateAuthUserExist,
+      postValidationMiddleware.postParamsValidator,
+      communityController.upvotePost, // TODO - cannot upvote a Post twice
+    );
 
     this.app
       .route(`${API_BASE_URI}/posts/:postId/downvote`)
@@ -128,9 +126,8 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
-        postValidationMiddleware.postParamsValidator,
-        commentValidationMiddleware.CommentParamsValidator,
-        communityController.getAllCommentOfAComment,
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
+        communityController.getAllCommentOfAComment, // √√
       )
       .post(
         commentValidationMiddleware.CreateCommentValidator,
@@ -142,9 +139,8 @@ export class CommunityRoutes extends CommonRoutesConfig {
       .put(
         accessAuthMiddleware.ensureAuth,
         UsersMiddleware.validateAuthUserExist,
-        postValidationMiddleware.postParamsValidator,
-        commentValidationMiddleware.CommentParamsValidator,
-        communityController.upvoteComment,
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
+        communityController.upvoteComment, // TODO - cannot upvote a Comment twice
       );
 
     this.app
@@ -152,8 +148,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
       .put(
         accessAuthMiddleware.ensureAuth,
         UsersMiddleware.validateAuthUserExist,
-        postValidationMiddleware.postParamsValidator,
-        commentValidationMiddleware.CommentParamsValidator,
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
         communityController.downvoteComment,
       );
 

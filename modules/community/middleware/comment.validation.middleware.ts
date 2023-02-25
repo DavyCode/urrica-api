@@ -46,6 +46,27 @@ class CommentValidationMiddleware {
       });
     }
   }
+  async CommentOnCommentParamsValidator(
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction,
+  ) {
+    const schema = Joi.object().keys({
+      commentId: Joi.string().min(8).required(),
+      postId: Joi.string().min(8).required(),
+    });
+
+    try {
+      await schema.validateAsync(req.params);
+      return next();
+    } catch (err: any) {
+      return res.status(400).json({
+        status: ServerResponseStatus.RESPONSE_STATUS_FAILURE,
+        errors: [`${err.details[0].message}`],
+        statusCode: ServerResponseStatus.BAD_REQUEST,
+      });
+    }
+  }
 }
 
 export default new CommentValidationMiddleware();

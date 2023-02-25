@@ -173,6 +173,89 @@ class CommunityPostCommentDao {
     this.Comment.deleteMany({ post: commentId }).exec();
   }
 
+  async upvoteComment(commentId: string, userId: MongooseObjectId) {
+    if (!mongooseService.validMongooseObjectId(commentId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(userId)) {
+      return Promise.resolve(false);
+    }
+
+    // remove from downvote list first
+    // remove from upvote list to avoid duplicates
+    await this.Comment.findOneAndUpdate(
+      { _id: commentId },
+      {
+        $pull: {
+          downvotes: userId,
+          upvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+      },
+    ).exec();
+
+    // add to upvote list
+    return (await this.Comment.findOneAndUpdate(
+      { _id: commentId },
+      {
+        $push: {
+          upvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    ).exec()) as CommunityPostCommentType;
+  }
+
+  async downvoteComment(commentId: string, userId: MongooseObjectId) {
+    // we need to remove from upvote list first
+    if (!mongooseService.validMongooseObjectId(commentId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(userId)) {
+      return Promise.resolve(false);
+    }
+
+    // remove from upvote list first
+    // remove from downvote list to avoid duplicates
+    await this.Comment.findOneAndUpdate(
+      { _id: commentId },
+      {
+        $pull: {
+          downvotes: userId,
+          upvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+      },
+    ).exec();
+
+    // add to downvote list
+    return (await this.Comment.findOneAndUpdate(
+      { _id: commentId },
+      {
+        $push: {
+          downvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    ).exec()) as CommunityPostCommentType;
+  }
+
   async findByIdAndAddtoList(
     commentId: string,
     update: any,

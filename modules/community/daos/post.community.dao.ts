@@ -278,6 +278,89 @@ class CommunityPostDao {
       option,
     ).exec()) as CommunityPostType;
   }
+
+  async upvotePost(postId: string, userId: MongooseObjectId) {
+    if (!mongooseService.validMongooseObjectId(postId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(userId)) {
+      return Promise.resolve(false);
+    }
+
+    // remove from downvote list first
+    // remove from upvote list to avoid duplicates
+    await this.Post.findOneAndUpdate(
+      { _id: postId },
+      {
+        $pull: {
+          downvotes: userId,
+          upvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+      },
+    ).exec();
+
+    // add to upvote list
+    return (await this.Post.findOneAndUpdate(
+      { _id: postId },
+      {
+        $push: {
+          upvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    ).exec()) as CommunityPostType;
+  }
+
+  async downvotePost(postId: string, userId: MongooseObjectId) {
+    // we need to remove from upvote list first
+    if (!mongooseService.validMongooseObjectId(postId)) {
+      return Promise.resolve(false);
+    }
+
+    if (!mongooseService.validMongooseObjectId(userId)) {
+      return Promise.resolve(false);
+    }
+
+    // remove from upvote list first
+    // remove from downvote list to avoid duplicates
+    await this.Post.findOneAndUpdate(
+      { _id: postId },
+      {
+        $pull: {
+          downvotes: userId,
+          upvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+      },
+    ).exec();
+
+    // add to downvote list
+    return (await this.Post.findOneAndUpdate(
+      { _id: postId },
+      {
+        $push: {
+          downvotes: userId,
+        },
+        'meta.updatedAt': Date.now(),
+      },
+      {
+        upsert: true,
+        new: true,
+      },
+    ).exec()) as CommunityPostType;
+  }
 }
 
 export default new CommunityPostDao();
