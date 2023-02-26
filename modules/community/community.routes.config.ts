@@ -164,10 +164,10 @@ export class CommunityRoutes extends CommonRoutesConfig {
     // Save a Post - [SKIP]
     // Comment on a Post - create new comment, tie it to a post √√√
     // Comment on a Comment - create new comment, tie it to a comment of a post √√√
-    // Get all Comments of a post - // TODO:
-    // Get all comments of a comments  - // TODO:
-    // Upvote a Comment // TODO:
-    // Downvote a Comment // TODO:
+    // Get all Comments of a post - √√
+    // Get all comments of a comments  - √√
+    // Upvote a Comment √√
+    // Downvote a Comment √√
 
     // NOTES
     // A post can have comments

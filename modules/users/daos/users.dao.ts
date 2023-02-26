@@ -54,7 +54,7 @@ class UsersDao {
     referral_code: { type: String },
     referredBy: {
       type: mongooseService.getMongoose().Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Users',
     },
     referralRecord: {
       type: mongooseService.getMongoose().Schema.Types.ObjectId,

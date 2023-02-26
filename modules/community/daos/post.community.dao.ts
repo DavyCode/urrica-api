@@ -26,7 +26,7 @@ class CommunityPostDao {
     text: String,
     owner: {
       type: mongooseService.getMongoose().Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Users',
     },
     comments: [
       {
@@ -213,17 +213,32 @@ class CommunityPostDao {
       filterParams;
 
     const data = await this.Post.find({ ...rest })
+      .populate('owner', 'profileImage firstName lastName')
       .limit(paginate.limit)
       .skip(paginate.skip)
       .sort({ 'meta.createdAt': -1 })
       .exec();
+
+    const finals = [];
+    for (let i = 0; i < data.length; i++) {
+      const { comments, upvotes, downvotes, ...rest } = Utils.parseToJSON(
+        data[i],
+      );
+
+      finals.push({
+        ...rest,
+        commentsCount: comments.length,
+        upvotesCount: upvotes.length,
+        downvotesCount: downvotes.length,
+      });
+    }
 
     const totalDocumentCount = await this.Post.countDocuments({
       ...rest,
     });
 
     return Promise.resolve({
-      posts: data,
+      posts: finals,
       totalDocumentCount,
       skip: paginate.skip,
       limit: paginate.limit,

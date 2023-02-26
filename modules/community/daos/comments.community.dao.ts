@@ -28,7 +28,7 @@ class CommunityPostCommentDao {
     text: String,
     owner: {
       type: mongooseService.getMongoose().Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'Users',
     },
     post: {
       ref: 'Post',
@@ -342,11 +342,25 @@ class CommunityPostCommentDao {
       isBaseComment: true,
       ...rest,
     })
+      .populate('owner', 'profileImage firstName lastName')
       .limit(paginate.limit)
       .skip(paginate.skip)
       .sort({ 'meta.createdAt': -1 })
-      .select('-passwordHash')
       .exec();
+
+    const finals = [];
+    for (let i = 0; i < data.length; i++) {
+      const { comments, upvotes, downvotes, ...rest } = Utils.parseToJSON(
+        data[i],
+      );
+
+      finals.push({
+        ...rest,
+        commentsCount: comments.length,
+        upvotesCount: upvotes.length,
+        downvotesCount: downvotes.length,
+      });
+    }
 
     const totalDocumentCount = await this.Comment.countDocuments({
       post: postId,
@@ -355,7 +369,7 @@ class CommunityPostCommentDao {
     });
 
     return Promise.resolve({
-      comments: data,
+      comments: finals,
       totalDocumentCount,
       skip: paginate.skip,
       limit: paginate.limit,
@@ -397,11 +411,26 @@ class CommunityPostCommentDao {
       isBaseComment: false,
       ...rest,
     })
+      .populate('owner', 'profileImage firstName lastName')
       .limit(paginate.limit)
       .skip(paginate.skip)
       .sort({ 'meta.createdAt': -1 })
       .select('-passwordHash')
       .exec();
+
+    const finals = [];
+    for (let i = 0; i < data.length; i++) {
+      const { comments, upvotes, downvotes, ...rest } = Utils.parseToJSON(
+        data[i],
+      );
+
+      finals.push({
+        ...rest,
+        commentsCount: comments.length,
+        upvotesCount: upvotes.length,
+        downvotesCount: downvotes.length,
+      });
+    }
 
     const totalDocumentCount = await this.Comment.countDocuments({
       baseComment: commentId,
@@ -410,7 +439,7 @@ class CommunityPostCommentDao {
     });
 
     return Promise.resolve({
-      comments: data,
+      comments: finals,
       totalDocumentCount,
       skip: paginate.skip,
       limit: paginate.limit,
