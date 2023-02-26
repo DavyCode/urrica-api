@@ -53,7 +53,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
-        accessAuthMiddleware.grantRoleAccess('readAny', 'Community'),
+        accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
         communityController.getAllPost, // √√
       )
       .post(
@@ -109,6 +109,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
+        accessAuthMiddleware.grantRoleAccess('readAny', 'Comment'),
         postValidationMiddleware.postParamsValidator,
         communityController.getAllCommentOfAPost, // √√
       )
@@ -126,6 +127,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
+        accessAuthMiddleware.grantRoleAccess('readAny', 'Comment'),
         commentValidationMiddleware.CommentOnCommentParamsValidator,
         communityController.getAllCommentOfAComment, // √√
       )
