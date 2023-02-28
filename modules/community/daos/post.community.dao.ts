@@ -117,7 +117,9 @@ class CommunityPostDao {
     if (!mongooseService.validMongooseObjectId(id)) {
       return Promise.resolve(false);
     }
-    return (await this.Post.findOne({ _id: id }).exec()) as CommunityPostType;
+    return (await this.Post.findOne({ _id: id })
+      .populate('owner', 'profileImage firstName lastName')
+      .exec()) as CommunityPostType;
   }
 
   /**
@@ -131,7 +133,9 @@ class CommunityPostDao {
         return Promise.resolve(false);
       }
     }
-    return this.Post.findOne(query).exec();
+    return this.Post.findOne(query)
+      .populate('owner', 'profileImage firstName lastName')
+      .exec();
   }
 
   async save(postInstance: CommunityPostType) {
@@ -144,7 +148,11 @@ class CommunityPostDao {
    * @returns
    */
   async find(query: any) {
-    return await this.Post.find(query);
+    // TODO - update with Queries
+    return await this.Post.find(query).populate(
+      'owner',
+      'profileImage firstName lastName',
+    );
   }
 
   /**
