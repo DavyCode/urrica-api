@@ -110,6 +110,23 @@ class CommunityService implements CRUD {
     return { post };
   }
 
+  async getPostWithComments(postId: string) {
+    const post = await PostDao.getAPost(postId);
+
+    if (!post) {
+      throw new NotFoundError('Post not found');
+    }
+
+    const commentsFound: any = await CommentDao.getAllCommentOfAPost(
+      postId,
+      {},
+    );
+    if (commentsFound) {
+      return { comments: commentsFound.comments, post };
+    }
+    return { comments: [], post };
+  }
+
   async putPost(postId: string, resource: PutPostDto) {
     const post = await PostDao.put(postId, resource, {
       new: true,
@@ -123,7 +140,7 @@ class CommunityService implements CRUD {
     return { post, message: 'Update successful' };
   }
 
-  async deleteAssociatedComments(postId: string) {
+  private async deleteAssociatedComments(postId: string) {
     const isDeletedComments = await CommentDao.deleteManyByPost(postId);
     return isDeletedComments;
   }

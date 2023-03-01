@@ -122,6 +122,27 @@ class CommunityPostDao {
       .exec()) as CommunityPostType;
   }
 
+  async getAPost(id: string): Promise<any> {
+    if (!mongooseService.validMongooseObjectId(id)) {
+      return Promise.resolve(false);
+    }
+
+    const data = (await this.Post.findById({
+      _id: id,
+    })
+      .populate('owner', 'profileImage firstName lastName')
+      // .select('-comments')
+      .exec()) as CommunityPostType;
+
+    const { upvotes, downvotes, comments, ...rest } = Utils.parseToJSON(data);
+
+    return Promise.resolve({
+      ...rest,
+      commentsCount: comments.length,
+      upvotesCount: upvotes.length,
+      downvotesCount: downvotes.length,
+    });
+  }
   /**
    * findOne
    * @param query

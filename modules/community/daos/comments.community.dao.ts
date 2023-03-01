@@ -165,7 +165,7 @@ class CommunityPostCommentDao {
     return this.Comment.estimatedDocumentCount().exec();
   }
 
-  async getAll(query: any) {
+  async getAll(query?: any) {
     return this.Comment.find(query).exec();
   }
 

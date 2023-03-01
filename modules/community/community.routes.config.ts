@@ -69,7 +69,8 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
-        communityController.getPost, // √√
+        // communityController.getPost, // √√
+        communityController.getPostWithComments,
       )
       .delete(
         postValidationMiddleware.postParamsValidator,

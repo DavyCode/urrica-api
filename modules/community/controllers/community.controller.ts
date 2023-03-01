@@ -78,6 +78,14 @@ class CommunityController {
     res.status(controllerRes.statusCode).send(controllerRes);
   }
 
+  async getPostWithComments(req: Request, res: Response): Promise<void> {
+    const { ...rest } = await communityService.getPostWithComments(
+      req.params.postId,
+    );
+    const controllerRes = new apiOKResponse(rest);
+    res.status(controllerRes.statusCode).send(controllerRes);
+  }
+
   async upvotePost(req: Request, res: Response): Promise<void> {
     const { message, ...rest } = await communityService.upvotePost(
       req.params.postId,

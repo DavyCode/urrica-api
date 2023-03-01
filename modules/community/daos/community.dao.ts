@@ -122,7 +122,7 @@ class CommunityDao {
     return this.Community.estimatedDocumentCount().exec();
   }
 
-  async getAll(query: any) {
+  async getAll(query?: any) {
     return this.Community.find(query).exec();
   }
 
