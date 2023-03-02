@@ -61,6 +61,10 @@ export class CommunityRoutes extends CommonRoutesConfig {
         communityController.createPost, // √√
       );
 
+    this.app.route(`${API_BASE_URI}/public/posts`).all().get(
+      communityController.getAllPost, // √√
+    );
+
     this.app
       .route(`${API_BASE_URI}/posts/:postId`)
       .all(
