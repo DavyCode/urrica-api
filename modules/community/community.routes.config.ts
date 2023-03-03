@@ -66,6 +66,14 @@ export class CommunityRoutes extends CommonRoutesConfig {
     );
 
     this.app
+      .route(`${API_BASE_URI}/public/posts/:postId`)
+      .all()
+      .get(
+        postValidationMiddleware.postParamsValidator,
+        communityController.getPostWithComments,
+      );
+
+    this.app
       .route(`${API_BASE_URI}/posts/:postId`)
       .all(
         accessAuthMiddleware.ensureAuth,
@@ -73,6 +81,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
+        postValidationMiddleware.postParamsValidator,
         // communityController.getPost, // √√
         communityController.getPostWithComments,
       )
@@ -91,12 +100,14 @@ export class CommunityRoutes extends CommonRoutesConfig {
         communityController.putPost,
       );
 
-    this.app.route(`${API_BASE_URI}/posts/:postId/upvote`).put(
-      accessAuthMiddleware.ensureAuth,
-      UsersMiddleware.validateAuthUserExist,
-      postValidationMiddleware.postParamsValidator,
-      communityController.upvotePost, // TODO - cannot upvote a Post twice
-    );
+    this.app
+      .route(`${API_BASE_URI}/posts/:postId/upvote`)
+      .put(
+        accessAuthMiddleware.ensureAuth,
+        UsersMiddleware.validateAuthUserExist,
+        postValidationMiddleware.postParamsValidator,
+        communityController.upvotePost,
+      );
 
     this.app
       .route(`${API_BASE_URI}/posts/:postId/downvote`)
@@ -105,6 +116,19 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
         postValidationMiddleware.postParamsValidator,
         communityController.downvotePost,
+      );
+
+    this.app.route(`${API_BASE_URI}/public/posts/:postId/comments`).all().get(
+      postValidationMiddleware.postParamsValidator,
+      communityController.getAllCommentOfAPost, // √√
+    );
+
+    this.app
+      .route(`${API_BASE_URI}/public/posts/:postId/comments/:commentId`)
+      .all()
+      .get(
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
+        communityController.getAllCommentOfAComment, // √√
       );
 
     this.app
