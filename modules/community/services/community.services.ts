@@ -111,20 +111,29 @@ class CommunityService implements CRUD {
   }
 
   async getPostWithComments(postId: string) {
-    const post = await PostDao.getAPost(postId);
+    const post = await PostDao.findOne({ _id: postId });
 
     if (!post) {
       throw new NotFoundError('Post not found');
     }
+
+    const { upvotes, downvotes, comments, ...rest } = Utils.parseToJSON(post);
+    const thePost = {
+      ...rest,
+      commentsCount: comments.length,
+      upvotesCount: upvotes.length,
+      downvotesCount: downvotes.length,
+    };
 
     const commentsFound: any = await CommentDao.getAllCommentOfAPost(
       postId,
       {},
     );
     if (commentsFound) {
-      return { comments: commentsFound.comments, post };
+      return { comments: commentsFound.comments, post: thePost };
     }
-    return { comments: [], post };
+
+    return { comments: [], post: thePost };
   }
 
   async putPost(postId: string, resource: PutPostDto) {

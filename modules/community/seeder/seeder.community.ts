@@ -1,7 +1,7 @@
 import debug from 'debug';
 import { InternalServerError } from '../../../common/utils/errors';
 
-const log: debug.IDebugger = debug('app:Community-dao');
+const log: debug.IDebugger = debug('app:community-seeder-dao');
 
 export default (CommunityDao: any) => {
   Promise.resolve(CommunityDao.find({ communityId: 'URRICA_COM_0001' }))

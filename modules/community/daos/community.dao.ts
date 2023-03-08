@@ -92,7 +92,7 @@ class CommunityDao {
     return (await this.Community.findOne({ _id: id }).exec()) as CommunityType;
   }
 
-  async findOne(query: any) {
+  async findOne(query: Record<string, any>) {
     if (query._id) {
       if (!mongooseService.validMongooseObjectId(query._id)) {
         return Promise.resolve(false);
@@ -105,7 +105,7 @@ class CommunityDao {
     return await communityInstance.save();
   }
 
-  async find(query: any) {
+  async find(query: Record<string, any>) {
     return await this.Community.find(query);
   }
 
@@ -122,7 +122,7 @@ class CommunityDao {
     return this.Community.estimatedDocumentCount().exec();
   }
 
-  async getAll(query?: any) {
+  async getAll(query?: Record<string, any> | any) {
     return this.Community.find(query).exec();
   }
 

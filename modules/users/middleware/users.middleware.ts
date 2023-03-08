@@ -35,6 +35,7 @@ class UsersMiddleware {
   ) {
     const user = await usersService.getById(res.locals.jwt.userId);
     if (user) {
+      res.locals.user = user;
       next();
     } else {
       throw new NotFoundError(userErrors.userNotFoundError);

@@ -143,6 +143,7 @@ class CommunityPostDao {
       downvotesCount: downvotes.length,
     });
   }
+
   /**
    * findOne
    * @param query
@@ -249,17 +250,19 @@ class CommunityPostDao {
       .exec();
 
     const finals = [];
-    for (let i = 0; i < data.length; i++) {
-      const { comments, upvotes, downvotes, ...rest } = Utils.parseToJSON(
-        data[i],
-      );
+    if (data.length > 0) {
+      for (let i = 0; i < data.length; i++) {
+        const { comments, upvotes, downvotes, ...rest } = Utils.parseToJSON(
+          data[i],
+        );
 
-      finals.push({
-        ...rest,
-        commentsCount: comments.length,
-        upvotesCount: upvotes.length,
-        downvotesCount: downvotes.length,
-      });
+        finals.push({
+          ...rest,
+          commentsCount: comments.length,
+          upvotesCount: upvotes.length,
+          downvotesCount: downvotes.length,
+        });
+      }
     }
 
     const totalDocumentCount = await this.Post.countDocuments({
