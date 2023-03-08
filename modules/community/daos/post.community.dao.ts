@@ -216,7 +216,7 @@ class CommunityPostDao {
    * @returns
    */
   async getAll(query?: any) {
-    const paginate = { skip: 0, limit: 10 };
+    const paginate = { skip: 0, limit: 30 };
 
     if (query && query.skip && query.limit) {
       paginate.skip = Number(query.skip);

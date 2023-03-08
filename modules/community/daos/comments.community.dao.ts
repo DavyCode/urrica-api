@@ -311,7 +311,7 @@ class CommunityPostCommentDao {
       return Promise.resolve(false);
     }
 
-    const paginate = { skip: 0, limit: 10 };
+    const paginate = { skip: 0, limit: 30 };
 
     if (query && query.skip && query.limit) {
       paginate.skip = Number(query.skip);
@@ -384,7 +384,7 @@ class CommunityPostCommentDao {
     if (!mongooseService.validMongooseObjectId(commentId)) {
       return Promise.resolve(false);
     }
-    const paginate = { skip: 0, limit: 10 };
+    const paginate = { skip: 0, limit: 30 };
 
     if (query && query.skip && query.limit) {
       paginate.skip = Number(query.skip);
