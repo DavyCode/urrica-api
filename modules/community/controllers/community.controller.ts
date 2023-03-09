@@ -160,6 +160,14 @@ class CommunityController {
     const controllerRes = new apiOKResponse(rest, message);
     res.status(controllerRes.statusCode).send(controllerRes);
   }
+
+  async getACommentWithComments(req: Request, res: Response): Promise<void> {
+    const { ...rest } = await communityService.getACommentWithComments(
+      req.params.commentId,
+    );
+    const controllerRes = new apiOKResponse(rest);
+    res.status(controllerRes.statusCode).send(controllerRes);
+  }
 }
 
 export default new CommunityController();

@@ -431,6 +431,34 @@ class CommunityService implements CRUD {
 
     return { post, message: 'Vote removed' };
   }
+
+  async getACommentWithComments(commentId: string) {
+    const comment = await CommentDao.findOne({ _id: commentId });
+
+    if (!comment) {
+      throw new NotFoundError('Comment not found');
+    }
+
+    const { upvotes, downvotes, comments, ...rest } =
+      Utils.parseToJSON(comment);
+    const theComment = {
+      ...rest,
+      commentsCount: comments.length,
+      upvotesCount: upvotes.length,
+      downvotesCount: downvotes.length,
+    };
+
+    const commentsFound: any = await CommentDao.getAllCommentOfAComment(
+      commentId,
+      {},
+    );
+
+    if (commentsFound) {
+      return { comments: commentsFound.comments, comment: theComment };
+    }
+
+    return { comments: [], comment: theComment };
+  }
 }
 
 export default new CommunityService();

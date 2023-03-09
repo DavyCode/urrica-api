@@ -54,7 +54,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
       )
       .get(
         accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
-        communityController.getAllPost, // √√
+        communityController.getAllPost, // √√ // TODO - PRIVATE
       )
       .post(
         postValidationMiddleware.CreatePostValidator,
@@ -62,16 +62,13 @@ export class CommunityRoutes extends CommonRoutesConfig {
       );
 
     this.app.route(`${API_BASE_URI}/public/posts`).all().get(
-      communityController.getAllPost, // √√
+      communityController.getAllPost, // √√  // TODO - PUBLIC
     );
 
-    this.app
-      .route(`${API_BASE_URI}/public/posts/:postId`)
-      .all()
-      .get(
-        postValidationMiddleware.postParamsValidator,
-        communityController.getPostWithComments,
-      );
+    this.app.route(`${API_BASE_URI}/public/posts/:postId`).all().get(
+      postValidationMiddleware.postParamsValidator,
+      communityController.getPostWithComments, // TODO - PUBLIC
+    );
 
     this.app
       .route(`${API_BASE_URI}/posts/:postId`)
@@ -83,7 +80,7 @@ export class CommunityRoutes extends CommonRoutesConfig {
         accessAuthMiddleware.grantRoleAccess('readAny', 'Post'),
         postValidationMiddleware.postParamsValidator,
         // communityController.getPost, // √√
-        communityController.getPostWithComments,
+        communityController.getPostWithComments, // TODO - PRIVATE
       )
       .delete(
         postValidationMiddleware.postParamsValidator,
@@ -124,14 +121,6 @@ export class CommunityRoutes extends CommonRoutesConfig {
     );
 
     this.app
-      .route(`${API_BASE_URI}/public/posts/:postId/comments/:commentId`)
-      .all()
-      .get(
-        commentValidationMiddleware.CommentOnCommentParamsValidator,
-        communityController.getAllCommentOfAComment, // √√
-      );
-
-    this.app
       .route(`${API_BASE_URI}/posts/:postId/comments`)
       .all(
         accessAuthMiddleware.ensureAuth,
@@ -149,6 +138,35 @@ export class CommunityRoutes extends CommonRoutesConfig {
       .put() // TODO:
       .delete(); // TODO:
 
+    this.app // todo - Get All comment - PUBLIC
+      .route(
+        `${API_BASE_URI}/public/posts/:postId/comments/:commentId/comments`,
+      )
+      .all()
+      .get(
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
+        communityController.getAllCommentOfAComment, // √√
+      );
+
+    this.app // todo - Get All comment - LOGGED IN
+      .route(`${API_BASE_URI}/posts/:postId/comments/:commentId/comments`)
+      .all(
+        accessAuthMiddleware.ensureAuth,
+        UsersMiddleware.validateAuthUserExist,
+      )
+      .get(
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
+        communityController.getAllCommentOfAComment, // √√
+      );
+
+    this.app // todo - Get one comment - PUBLIC
+      .route(`${API_BASE_URI}/public/posts/:postId/comments/:commentId`)
+      .all()
+      .get(
+        commentValidationMiddleware.CommentOnCommentParamsValidator,
+        communityController.getACommentWithComments, // √√
+      );
+
     this.app
       .route(`${API_BASE_URI}/posts/:postId/comments/:commentId`)
       .all(
@@ -156,9 +174,10 @@ export class CommunityRoutes extends CommonRoutesConfig {
         UsersMiddleware.validateAuthUserExist,
       )
       .get(
+        // todo - Get one comment - LOGGED IN
         accessAuthMiddleware.grantRoleAccess('readAny', 'Comment'),
         commentValidationMiddleware.CommentOnCommentParamsValidator,
-        communityController.getAllCommentOfAComment, // √√
+        communityController.getACommentWithComments, // √√
       )
       .post(
         commentValidationMiddleware.CreateCommentValidator,
