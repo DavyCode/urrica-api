@@ -139,7 +139,9 @@ class CommunityPostCommentDao {
         return Promise.resolve(false);
       }
     }
-    return this.Comment.findOne(query).exec();
+    return this.Comment.findOne(query)
+      .populate('owner', 'profileImage firstName lastName')
+      .exec();
   }
 
   async save(postInstance: CommunityPostCommentType) {
