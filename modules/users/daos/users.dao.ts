@@ -26,7 +26,8 @@ class UsersDao {
     profileImage: {
       type: String,
       default:
-        'https://res.cloudinary.com/davycode/image/upload/v1590239023/avatar.png',
+        // 'https://res.cloudinary.com/davycode/image/upload/v1590239023/avatar.png',
+        'https://images.unsplash.com/placeholder-avatars/extra-large.jpg',
     },
     email: {
       type: String,
