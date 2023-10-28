@@ -84,7 +84,6 @@ class MailerService {
         });
       });
     } catch (err) {
-      console.log('MailerService catch==============', err);
       log(err);
     }
   }

@@ -1,280 +1,56 @@
-import UsersDao from '../daos/users.dao';
-import { CRUD } from '../../../common/interfaces/crud.interface';
-import { CreateUserDto } from '../dto/create.user.dto';
-import { PutUserDto } from '../dto/put.user.dto';
-import { UserType } from '../types/user.type';
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from '../../../common/utils/errors';
-import {
-  emailErrors,
-  userErrors,
-} from '../../../common/constant/errorMessages';
-import Pubsub from '../events/user.events';
-import Utils from '../../../common/utils/utils';
-import { MongooseObjectId } from '../../../common/types/mongoose.types';
+import UsersDao from "../daos/users.dao";
+import { CRUD } from "../../../common/interfaces/crud.interface";
+import { CreateUserDto } from "../dto/create.user.dto";
+import { PutUserDto } from "../dto/put.user.dto";
+import { BadRequestError, NotFoundError } from "../../../common/utils/errors";
 
 class UsersService implements CRUD {
-  /**
-   * Create User
-   * @param resource CreateUserDto
-   * @returns
-   */
-  async create(resource: CreateUserDto) {
-    // first check if user exist
-    const user: any = await UsersDao.findOne({ email: resource.email });
-    if (user && user.verified) {
-      throw new ForbiddenError(emailErrors.emailTakenAndVerified);
-    }
+	async create(resource: CreateUserDto) {
+		return UsersDao.addUser(resource);
+	}
 
-    if (user && !user.verified) {
-      const updatedUser = await UsersDao.put(
-        { _id: user._id },
-        {
-          verifyEmailOtp: Utils.RandomInteger().toString().substring(2, 8),
-          'meta.updatedAt': Date.now(),
-        },
-        {
-          new: true,
-          upsert: false,
-        },
-      );
-      // send verification email
-      Pubsub.emit('user_signup_otp', {
-        firstName: updatedUser?.firstName,
-        email: updatedUser?.email,
-        otp: updatedUser?.verifyEmailOtp,
-      });
-      return { message: 'Check your email for verification OTP' };
-    }
+	async putById(id: string, resource: PutUserDto): Promise<any> {
+		return UsersDao.putUserById(id, resource);
+	}
 
-    const { referredBy, ...rest } = resource;
-    let referrer: MongooseObjectId | undefined = undefined;
-    if (referredBy) {
-      const refUser: any = await UsersDao.findOne({ referredBy });
-      if (refUser) {
-        referrer = refUser._id;
-      }
-    }
-    const newUser = await UsersDao.addUser({
-      referredBy: referrer,
-      ...rest,
-    });
+	async getById(id: string) {
+		return UsersDao.getUserById(id);
+	}
 
-    Pubsub.emit('welcome_to_urrica', {
-      firstName: newUser.firstName,
-      email: newUser?.email,
-      otp: newUser?.verifyEmailOtp,
-    });
+	async getAll(limit: number, page: number) {
+		return UsersDao.getAllUsers();
+	}
 
-    return { message: 'Check your email for verification OTP' };
-  }
+	async getUserByEmail(email: string) {
+		return UsersDao.getUserByEmail(email);
+	}
+	async transferMoney(
+		userId: string,
+		payload: { amount: number; email: string }
+	) {
+		const sender: any = await UsersDao.getUserById(userId);
+		if (!sender) {
+			throw new NotFoundError("Sender not found");
+		}
 
-  /**
-   * putById
-   * @param id
-   * @param resource
-   * @returns
-   */
-  async putById(id: string, resource: PutUserDto): Promise<any> {
-    const user = await UsersDao.putById(id, resource, {
-      new: true,
-      upsert: false,
-    });
+		const receiver: any = await UsersDao.getUserByEmail(payload.email);
+		if (!receiver) {
+			throw new NotFoundError("recipient not found");
+		}
 
-    if (!user) {
-      throw new NotFoundError(`User not found`); //TODO: don't send user ID to frontend
-    }
+		const amt = Number(payload.amount);
+		if (sender.balance < amt) {
+			throw new BadRequestError("balance too low for this transaction");
+		}
 
-    return { user, message: 'Update successful' };
-  }
+		const senderBal = Number(sender.balance) - amt;
+		const receiverBalance = Number(receiver.balance) + amt;
 
-  async getById(id: string) {
-    const user = await UsersDao.getUserById(id);
-    if (!user) {
-      throw new NotFoundError(`User ${id} not found`);
-    }
-    return {
-      user,
-    };
-  }
+		await UsersDao.putUserById(userId, { balance: senderBal });
+		await UsersDao.putUserById(receiver._id, { balance: receiverBalance });
 
-  async getAll(query?: any) {
-    return UsersDao.getAllUsers(query);
-  }
-
-  async getUserByEmail(email: string) {
-    return UsersDao.findOne({ email });
-  }
-
-  async getUserTotalCount() {
-    return UsersDao.getUserTotalCount();
-  }
-
-  /**
-   * verifyUserOtp
-   * @param {string} verifyEmailOtp
-   * @returns {}
-   */
-  async verifyUserOtp(otp: string) {
-    if (!otp) {
-      throw new BadRequestError('OTP required!');
-    }
-    const otpUser = await UsersDao.put(
-      { verifyEmailOtp: otp },
-      {
-        verified: true,
-        active: true,
-        verifyEmailOtp: '',
-        'meta.updatedAt': Date.now(),
-      },
-      { new: true, upsert: false },
-    );
-
-    if (!otpUser) {
-      throw new NotFoundError('Wrong verification OTP');
-    }
-
-    Pubsub.emit('user_signup_otp_confirmed', {
-      email: otpUser.email,
-      firstName: otpUser.firstName,
-    });
-    return { message: 'Email verified' };
-  }
-
-  /**
-   *
-   * @param email
-   * @returns
-   */
-  async getVerifyUserOtp(email: string) {
-    const user: any = await UsersDao.findOne({ email });
-    if (!user) throw new NotFoundError(`User does not exist`);
-
-    if (user && user.verified) {
-      throw new ForbiddenError(emailErrors.emailTakenAndVerified);
-    }
-
-    const updatedUser = await UsersDao.put(
-      { _id: user._id },
-      {
-        verifyEmailOtp: Utils.RandomInteger().toString().substring(2, 8),
-        'meta.updatedAt': Date.now(),
-      },
-      {
-        new: true,
-        upsert: false,
-      },
-    );
-    // send verification email
-    Pubsub.emit('user_signup_otp', {
-      firstName: updatedUser?.firstName,
-      email: updatedUser?.email,
-      otp: updatedUser?.verifyEmailOtp,
-    });
-    return { message: 'Check your email for verification OTP' };
-  }
-
-  /**
-   * getPasswordResetOtp
-   * @param email
-   * @returns
-   */
-  async getPasswordResetOtp(email: string) {
-    if (!email) {
-      throw new BadRequestError('OTP required!');
-    }
-
-    const otpUser = await UsersDao.put(
-      { email },
-      {
-        verified: true,
-        active: true,
-        resetPasswordPin: Utils.RandomInteger().toString().substring(2, 8),
-        'meta.updatedAt': Date.now(),
-      },
-      { new: true, upsert: false },
-    );
-
-    if (!otpUser) {
-      throw new NotFoundError('User not found');
-    }
-
-    Pubsub.emit('reset_password_otp', {
-      email: otpUser.email,
-      firstName: otpUser.firstName,
-      otp: otpUser?.resetPasswordPin,
-    });
-
-    return { message: 'Check your email for reset OTP' };
-  }
-
-  /**
-   * resetPassword
-   * @param otp
-   * @param password
-   * @returns
-   */
-  async resetPassword(otp: string, password: string) {
-    if (!otp || !password) {
-      throw new BadRequestError('OTP and new password required!');
-    }
-
-    const passwordHash = await UsersDao.hashPassword(password);
-    const user = await UsersDao.put(
-      { resetPasswordPin: otp },
-      {
-        passwordHash,
-        resetPasswordPin: '',
-        'meta.updatedAt': Date.now(),
-      },
-      { new: true, upsert: false },
-    );
-
-    if (!user) {
-      throw new NotFoundError('Wrong OTP');
-    }
-
-    Pubsub.emit('password_reset_success', {
-      email: user.email,
-      firstName: user.firstName,
-    });
-
-    return { message: 'Good to go', user };
-  }
-
-  async changePassword(
-    oldPassword: string,
-    newPassword: string,
-    confirmPassword: string,
-    userId: string,
-  ) {
-    const user: any = await UsersDao.findOne({ _id: userId });
-    if (!user) {
-      throw new NotFoundError('User not found');
-    }
-
-    const isPasswordMatch = await UsersDao.comparePasswords(user, oldPassword);
-    if (!isPasswordMatch) {
-      throw new BadRequestError('Wrong password');
-    }
-
-    if (confirmPassword !== newPassword) {
-      throw new BadRequestError("Password don't match");
-    }
-
-    user.passwordHash = await UsersDao.hashPassword(newPassword);
-    user.meta.updatedAt = Date.now();
-    await UsersDao.save(user);
-    const { passwordHash, ...userData } = Utils.parseToJSON(user);
-
-    return {
-      user: userData,
-      message: 'Password change successful',
-    };
-  }
+		return { senderBal: senderBal, message: "Transaction complete" };
+	}
 }
 
 export default new UsersService();

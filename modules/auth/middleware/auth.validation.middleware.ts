@@ -1,16 +1,14 @@
 import express from "express";
 import Joi from "joi";
 
-class UserValidationMiddleware {
-	async CreateUserValidator(
+class AuthValidationMiddleware {
+	async LoginValidator(
 		req: express.Request,
 		res: express.Response,
 		next: express.NextFunction
 	) {
 		const schema = Joi.object()
 			.keys({
-				firstName: Joi.string().required(),
-				lastName: Joi.string().required(),
 				password: Joi.string().min(8).required(),
 				email: Joi.string().email().required(),
 			})
@@ -25,14 +23,13 @@ class UserValidationMiddleware {
 				.json({ status: "error", message: `${err.details[0].message}` });
 		}
 	}
-
-	async TransferValidator(
+	async RefreshValidator(
 		req: express.Request,
 		res: express.Response,
 		next: express.NextFunction
 	) {
 		const schema = Joi.object().keys({
-			amount: Joi.number().min(1),
+			refreshToken: Joi.string().required(),
 			email: Joi.string().email().required(),
 		});
 
@@ -47,4 +44,4 @@ class UserValidationMiddleware {
 	}
 }
 
-export default new UserValidationMiddleware();
+export default new AuthValidationMiddleware();

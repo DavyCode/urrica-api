@@ -1,3 +1,5 @@
-export type JWT_ = {
-  userId: string;
+export type Jwt = {
+	userId: string;
+	role: string;
+	iat: Date;
 };

@@ -1,134 +1,35 @@
-import { query, Request, Response } from 'express';
-import debug from 'debug';
-import usersService from '../services/user.services';
-import {
-  apiCreatedResponse,
-  apiOKResponse,
-} from '../../../common/utils/apiResponses';
+import express from "express";
+import usersService from "../services/user.services";
+import debug from "debug";
+import Utils from "../../../common/utils/";
 
-const log: debug.IDebugger = debug('app:users-controller');
+const log: debug.IDebugger = debug("app:users-controller");
 
 class UsersController {
-  /**
-   * getAllUsers
-   * @param req
-   * @param res
-   */
-  async getAllUsers(req: Request, res: Response) {
-    const { ...rest } = await usersService.getAll(req.query);
-    const controllerRes = new apiOKResponse(rest);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
+	async getAllUsers(req: express.Request, res: express.Response) {
+		const users = await usersService.getAll(10, 0);
+		res.status(200).send({ status: "success", data: users });
+	}
 
-  async getUserById(req: Request, res: Response) {
-    const user = await usersService.getById(req.params.userId);
-    res.status(200).send({ status: 'success', data: user });
-  }
+	async getUserById(req: express.Request, res: express.Response) {
+		const user = await usersService.getById(req.params.userId);
+		const userData = Utils.cleanUserResponseData(user);
+		res.status(200).send({ status: "success", data: userData });
+	}
 
-  /**
-   * getUser
-   * @param req
-   * @param res
-   */
-  async getUser(req: Request, res: Response): Promise<void> {
-    const { ...rest } = await usersService.getById(req.params.userId);
-    const controllerRes = new apiOKResponse(rest);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
+	async createUser(req: express.Request, res: express.Response) {
+		const user = await usersService.create(req.body);
+		const userData = Utils.cleanUserResponseData(user);
+		res.status(200).send({ status: "success", data: userData });
+	}
 
-  /**
-   * createUser
-   * @param req
-   * @param res
-   */
-  async createUser(req: Request, res: Response): Promise<void> {
-    const { message, ...rest } = await usersService.create(req.body);
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-
-  /**
-   * updateUser
-   * @param req
-   * @param res
-   */
-  async updateUser(req: Request, res: Response) {
-    const { message, ...rest } = await usersService.putById(
-      req.params.userId,
-      req.body,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-
-  /**
-   * patchUser
-   * @param req
-   * @param res
-   */
-  async patchUser(req: Request, res: Response) {
-    const { message, ...rest } = await usersService.putById(
-      req.params.userId,
-      req.body,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-
-  /**
-   * verifyUserOtp
-   * @param req
-   * @param res
-   */
-  async verifyUserOtp(req: Request, res: Response): Promise<void> {
-    const { message, ...rest } = await usersService.verifyUserOtp(
-      req.params.otp,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-
-  async getVerifyUserOtp(req: Request, res: Response): Promise<void> {
-    const { message, ...rest } = await usersService.getVerifyUserOtp(
-      req.params.email,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-  /**
-   * getPasswordResetOtp
-   * @param req
-   * @param res
-   */
-  async getPasswordResetOtp(req: Request, res: Response): Promise<void> {
-    const { message, ...rest } = await usersService.getPasswordResetOtp(
-      req.params.email,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-
-  async resetPassword(req: Request, res: Response): Promise<void> {
-    const { otp, password } = req.params;
-    const { message, ...rest } = await usersService.resetPassword(
-      otp,
-      password,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
-
-  async changePassword(req: Request, res: Response): Promise<void> {
-    const { oldPassword, newPassword, confirmPassword } = req.body;
-    const { message, ...rest } = await usersService.changePassword(
-      oldPassword,
-      newPassword,
-      confirmPassword,
-      res.locals.jwt.userId,
-    );
-    const controllerRes = new apiOKResponse(rest, message);
-    res.status(controllerRes.statusCode).send(controllerRes);
-  }
+	async transferMoney(req: express.Request, res: express.Response) {
+		const transaction = await usersService.transferMoney(
+			res.locals.jwt.userId,
+			req.body
+		);
+		res.status(200).send({ status: "success", data: transaction });
+	}
 }
 
 export default new UsersController();
