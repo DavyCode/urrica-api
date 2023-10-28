@@ -23,6 +23,7 @@
   "author": "davycode",
   "license": "MIT",
   "dependencies": {
+    "@aws-sdk/client-cloudwatch-logs": "^3.438.0",
     "accesscontrol": "^2.2.1",
     "aws-sdk": "^2.1467.0",
     "axios": "^1.5.1",
@@ -39,7 +40,7 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^6.7.1",
     "express-winston": "^4.0.5",
-    "forever": "^4.0.3",
+    "forever": "^0.14.2",
     "helmet": "^4.4.1",
     "hpp": "^0.2.3",
     "http-status": "^1.6.2",
