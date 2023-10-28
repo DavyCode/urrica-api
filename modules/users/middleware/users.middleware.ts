@@ -1,67 +1,33 @@
-import express from 'express';
-import debug from 'debug';
-import usersService from '../services/user.services';
-import userController from '../controllers/users.controller';
-import {
-  BadRequestError,
-  ForbiddenError,
-  NotFoundError,
-} from '../../../common/utils/errors';
-import {
-  emailErrors,
-  userErrors,
-} from '../../../common/constant/errorMessages';
+import { Request, Response, NextFunction } from "express";
+import userService from "../services/user.services";
+import debug from "debug";
+import { NotFoundError, BadRequestError } from "../../../common/utils/errors";
 
-const log: debug.IDebugger = debug('app:users-controller-middleware');
+const log: debug.IDebugger = debug("app:users-controller");
 
 class UsersMiddleware {
-  async validateUserExists(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) {
-    const user = await usersService.getById(req.params.userId);
-    if (user) {
-      next();
-    } else {
-      throw new NotFoundError(userErrors.userIdNotFound);
-    }
-  }
+	async validateAuthUserExist(req: Request, res: Response, next: NextFunction) {
+		const user = await userService.getById(res.locals.jwt.userId);
+		if (user) {
+			res.locals.user = user;
+			next();
+		} else {
+			throw new NotFoundError("User not found");
+		}
+	}
 
-  async validateSameEmailExist(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) {
-    const user = await usersService.getUserByEmail(req.body.email);
-    if (user) {
-      throw new BadRequestError(emailErrors.emailTaken);
-    } else {
-      next();
-    }
-  }
-
-  async validateSameEmailAndVerified(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) {
-    const user: any = await usersService.getUserByEmail(req.body.email);
-    if (user && user.verified) {
-      throw new ForbiddenError(emailErrors.emailTakenAndVerified);
-    } else {
-      next();
-    }
-  }
-
-  async extractUserId(
-    req: express.Request,
-    res: express.Response,
-    next: express.NextFunction,
-  ) {
-    req.body.userId = req.params.userId;
-    next();
-  }
+	async validateSameEmailDoesntExist(
+		req: Request,
+		res: Response,
+		next: NextFunction
+	) {
+		const user = await userService.getUserByEmail(req.body.email);
+		if (user) {
+			throw new BadRequestError("User email already exists");
+		} else {
+			next();
+		}
+	}
 }
 
 export default new UsersMiddleware();

@@ -1,4 +1,7 @@
 export interface PutUserDto {
-  email: string;
-  password: string;
+	email: string;
+	firstName: string;
+	lastName: string;
+	password: string;
+	balance: number;
 }

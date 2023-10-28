@@ -1,24 +1,28 @@
 import dotenv from 'dotenv';
 
-if (process.env.RAILWAY_ENVIRONMENT !== 'production') {
-  const dotenvResult = dotenv.config();
-  // if (dotenvResult.error) {
-  //   throw dotenvResult.error;
-  // }
-}
+// Load .env
+dotenv.config();
 
 export const {
-  HOST,
   PORT,
   JWT_SECRET,
   JWT_EXPIRATION_MINUTES,
   JWT_BEARER,
+  JWT_REFRESH_TIME,
   DBURL,
-  API_BASE_URI,
+  API_VERSION,
   NODE_ENV,
-  PLATFORM_ENVIRONMENT,
-  ENVIRONMENT,
-  // aws
+  REDIS_URL,
+  HOST,
+
+  LOGS_DBURL,
+  CLOUDWATCH_GROUP_NAME,
+  CLOUDWATCH_GROUP_STREAM,
+  CLOUDWATCH_ACCESS_KEY,
+  CLOUDWATCH_SECRET_ACCESS_KEY,
+  CLOUDWATCH_REGION,
+  NODE_ENV_CLOUDWATCH,
+
   ACCESS_AWS_KEY_ID,
   SECRET_AWS_ACCESS_KEY,
   BUCKET_AWS_REGION,
