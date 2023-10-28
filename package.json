@@ -39,7 +39,7 @@
     "express-mongo-sanitize": "^2.2.0",
     "express-rate-limit": "^6.7.1",
     "express-winston": "^4.0.5",
-    "forever": "^0.14.2",
+    "forever": "^4.0.3",
     "helmet": "^4.4.1",
     "hpp": "^0.2.3",
     "http-status": "^1.6.2",
